@@ -3,33 +3,14 @@ export type InventoryStatus = "available" | "low" | "out";
 export function getInventoryStatus(item: {
   quantity: number;
   maxStock: number | null;
+  reorderQty: number;
 }): InventoryStatus {
   if (item.quantity <= 0) return "out";
+  if (item.reorderQty > 0 && item.quantity <= item.reorderQty) return "low";
   if (item.maxStock && item.maxStock > 0 && item.quantity * 100 < item.maxStock * 20) {
     return "low";
   }
   return "available";
-}
-
-export function stockFillPercent(item: {
-  quantity: number;
-  maxStock: number | null;
-}): number {
-  if (item.quantity <= 0) return 0;
-  if (!item.maxStock || item.maxStock <= 0) return 100;
-  return Math.min(100, (item.quantity / item.maxStock) * 100);
-}
-
-const SUPPLY_LABELS = ["Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"] as const;
-
-export function buildSupplyOverviewSeries(totalUnits: number) {
-  const n = SUPPLY_LABELS.length;
-  if (n <= 1) return [{ month: SUPPLY_LABELS[0], value: Math.max(0, totalUnits) }];
-  const start = Math.max(0, Math.floor(totalUnits * 0.55));
-  return SUPPLY_LABELS.map((month, i) => ({
-    month,
-    value: Math.round(start + ((totalUnits - start) * i) / (n - 1)),
-  }));
 }
 
 export function splitStockBars(inCount: number, lowCount: number, outCount: number) {

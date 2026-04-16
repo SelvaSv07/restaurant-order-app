@@ -21,7 +21,7 @@ export function AddInventoryProductDialog() {
         <Plus className="size-3.5" />
         Add Product
       </DialogTrigger>
-      <DialogContent className="max-w-md gap-4" showCloseButton>
+      <DialogContent className="max-w-md gap-6" showCloseButton>
         <DialogHeader>
           <DialogTitle className="text-[#333]">Add product</DialogTitle>
         </DialogHeader>
@@ -30,7 +30,7 @@ export function AddInventoryProductDialog() {
             await addInventoryItem(fd);
             setOpen(false);
           }}
-          className="grid gap-3"
+          className="grid gap-4"
         >
           <div className="grid gap-1.5">
             <Label htmlFor="inv-name">Name</Label>
@@ -39,10 +39,6 @@ export function AddInventoryProductDialog() {
           <div className="grid gap-1.5">
             <Label htmlFor="inv-unit">Unit</Label>
             <Input id="inv-unit" name="unit" required placeholder="kg / g / ml / piece" />
-          </div>
-          <div className="grid gap-1.5">
-            <Label htmlFor="inv-category">Category</Label>
-            <Input id="inv-category" name="category" placeholder="e.g. Food Ingredients" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1.5">
@@ -55,10 +51,18 @@ export function AddInventoryProductDialog() {
             </div>
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="inv-reorder">Reorder quantity</Label>
-            <Input id="inv-reorder" name="reorderQty" type="number" min={0} defaultValue={0} />
+            <Label htmlFor="inv-low">Low stock</Label>
+            <Input
+              id="inv-low"
+              name="reorderQty"
+              type="number"
+              min={0}
+              defaultValue={0}
+              placeholder="Alert when at or below"
+            />
+            <p className="text-xs text-[#858585]">Status shows Low when quantity is at or below this number.</p>
           </div>
-          <Button type="submit" className="mt-1 w-full bg-[#ff6b1e] hover:bg-[#ff6b1e]/90">
+          <Button type="submit" className="mt-2 w-full bg-[#ff6b1e] hover:bg-[#ff6b1e]/90">
             Save product
           </Button>
         </form>

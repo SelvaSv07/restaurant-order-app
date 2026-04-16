@@ -10,6 +10,25 @@ import { TZDate } from "@date-fns/tz";
 
 export type ChartBucket = "hour" | "day" | "month";
 
+/** Align SQLite strftime/date keys with JS-generated bucket keys (trim, pad hour). */
+export function normalizeBucketKey(bucket: ChartBucket, raw: string): string {
+  const s = String(raw).trim();
+  if (bucket === "hour") {
+    const m = /^(\d{4}-\d{2}-\d{2})T(\d{1,2})$/.exec(s);
+    if (m) return `${m[1]}T${m[2].padStart(2, "0")}`;
+    return s;
+  }
+  if (bucket === "day") {
+    const m = /^(\d{4}-\d{2}-\d{2})/.exec(s);
+    return m ? m[1] : s;
+  }
+  if (bucket === "month") {
+    const m = /^(\d{4}-\d{2})/.exec(s);
+    return m ? m[1] : s;
+  }
+  return s;
+}
+
 /** IST wall-clock hours to include on the chart (e.g. noon → 11pm for “12pm–12am” service window). */
 export type HourChartWindow = {
   startHour: number;
@@ -18,11 +37,11 @@ export type HourChartWindow = {
   appendNextDayMidnight?: boolean;
 };
 
-/** Noon through 11pm IST, plus 12 AM (next day midnight hour) on the axis. */
+/** Full IST calendar day (midnight–11pm). Revenue before noon was previously dropped from the chart. */
 export const TODAY_CHART_HOUR_WINDOW: HourChartWindow = {
-  startHour: 12,
+  startHour: 0,
   endHour: 23,
-  appendNextDayMidnight: true,
+  appendNextDayMidnight: false,
 };
 
 /** Format `yyyy-MM-ddTHH` bucket keys using Asia/Kolkata (matches SQL grouping). */
@@ -53,13 +72,16 @@ function mergeKeys(
   bucket: ChartBucket,
   hourWindow?: HourChartWindow,
 ): { day: string; value: number }[] {
-  const map = new Map(rows.map((r) => [r.day, r.value]));
+  const map = new Map<string, number>();
+  for (const r of rows) {
+    map.set(r.day, (map.get(r.day) ?? 0) + r.value);
+  }
   const start = new TZDate(from.getTime(), IST);
   const end = new TZDate(to.getTime(), IST);
   if (bucket === "month") {
     const months = eachMonthOfInterval({ start, end });
     return months.map((d) => {
-      const key = format(d, "yyyy-MM");
+      const key = normalizeBucketKey("month", format(d, "yyyy-MM"));
       return { day: key, value: map.get(key) ?? 0 };
     });
   }
@@ -68,12 +90,12 @@ function mergeKeys(
       const dateStr = format(start, "yyyy-MM-dd");
       const out: { day: string; value: number }[] = [];
       for (let h = hourWindow.startHour; h <= hourWindow.endHour; h++) {
-        const key = `${dateStr}T${String(h).padStart(2, "0")}`;
+        const key = normalizeBucketKey("hour", `${dateStr}T${String(h).padStart(2, "0")}`);
         out.push({ day: key, value: map.get(key) ?? 0 });
       }
       if (hourWindow.appendNextDayMidnight) {
         const nextDayStr = format(addDays(start, 1), "yyyy-MM-dd");
-        const midnightKey = `${nextDayStr}T00`;
+        const midnightKey = normalizeBucketKey("hour", `${nextDayStr}T00`);
         out.push({ day: midnightKey, value: map.get(midnightKey) ?? 0 });
       }
       return out;
@@ -82,13 +104,13 @@ function mergeKeys(
     const hourEnd = startOfHour(end);
     const hours = eachHourOfInterval({ start: hourStart, end: hourEnd });
     return hours.map((d) => {
-      const key = format(d, "yyyy-MM-dd'T'HH");
+      const key = normalizeBucketKey("hour", format(d, "yyyy-MM-dd'T'HH"));
       return { day: key, value: map.get(key) ?? 0 };
     });
   }
   const days = eachDayOfInterval({ start, end });
   return days.map((d) => {
-    const key = format(d, "yyyy-MM-dd");
+    const key = normalizeBucketKey("day", format(d, "yyyy-MM-dd"));
     return { day: key, value: map.get(key) ?? 0 };
   });
 }
@@ -101,7 +123,7 @@ export function mergeRevenueChart(
   hourWindow?: HourChartWindow,
 ): { day: string; totalRupee: number }[] {
   const normalized = rows.map((r) => ({
-    day: r.day,
+    day: normalizeBucketKey(bucket, String(r.day)),
     value: Number(r.totalRupee),
   }));
   return mergeKeys(normalized, from, to, bucket, hourWindow).map((r) => ({
@@ -118,7 +140,7 @@ export function mergeCountSeries(
   hourWindow?: HourChartWindow,
 ): { day: string; count: number }[] {
   const normalized = rows.map((r) => ({
-    day: r.day,
+    day: normalizeBucketKey(bucket, String(r.day)),
     value: Number(r.count),
   }));
   return mergeKeys(normalized, from, to, bucket, hourWindow).map((r) => ({

@@ -35,7 +35,7 @@ export function BillsSearch({ initialQuery }: { initialQuery: string }) {
   }, [value, initialQuery, push]);
 
   return (
-    <div className="flex flex-1 items-center gap-2 rounded-xl bg-white px-3 py-2 shadow-sm sm:max-w-[min(100%,420px)] sm:flex-initial">
+    <div className="flex w-full max-w-full flex-1 items-center gap-2 rounded-xl bg-white px-3 py-2 shadow-[0_4px_24px_rgba(51,51,51,0.06)] ring-1 ring-[#ebebeb] sm:max-w-[min(100%,480px)]">
       <Search className="size-[18px] shrink-0 text-[#858585]" strokeWidth={1.75} />
       <Input
         value={value}

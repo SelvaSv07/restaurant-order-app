@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:clear-bills": "node scripts/clear-bills.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.0",

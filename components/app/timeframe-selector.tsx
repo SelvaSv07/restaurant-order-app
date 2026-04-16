@@ -34,6 +34,7 @@ export type TimeframeSelectorVariant = "panel" | "header";
 export function TimeframeSelector({ variant = "panel" }: { variant?: TimeframeSelectorVariant }) {
   const router = useRouter();
   const pathname = usePathname();
+  const periodFieldId = pathname?.includes("/bills") ? "bills-period" : "dashboard-period";
   const params = useSearchParams();
   const period = (params.get("period") as PeriodPreset | null) ?? "today";
   const from = params.get("from") ?? "";
@@ -61,10 +62,10 @@ export function TimeframeSelector({ variant = "panel" }: { variant?: TimeframeSe
       }}
     >
       <SelectTrigger
-        id="dashboard-period"
+        id={periodFieldId}
         className={
           variant === "header"
-            ? "h-11 min-w-[200px] rounded-full border-0 bg-[#f0f4f8] px-3 pl-3 text-left text-sm font-medium text-[#333] shadow-none ring-0 hover:bg-[#e8edf2] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35 data-placeholder:text-[#858585] sm:min-w-[220px]"
+            ? "h-11 min-w-[200px] rounded-full border-0 bg-[#f7f7f7] px-3 pl-3 text-left text-sm font-medium text-[#333] shadow-none ring-1 ring-[#ebebeb] hover:bg-[#f0f0f0] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35 data-placeholder:text-[#858585] sm:min-w-[220px]"
             : "h-11 w-full max-w-md rounded-xl border-0 bg-[#f7f7f7] px-3 text-left text-sm font-medium text-[#333] shadow-none ring-1 ring-[#ebebeb] hover:bg-[#f0f0f0] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35 data-placeholder:text-[#858585]"
         }
         size="default"
@@ -136,7 +137,7 @@ export function TimeframeSelector({ variant = "panel" }: { variant?: TimeframeSe
 
   return (
     <div className="rounded-xl bg-white p-3 shadow-[0_4px_24px_rgba(51,51,51,0.06)] ring-1 ring-[#ebebeb]">
-      <label className="mb-2 block text-xs font-medium text-[#858585]" htmlFor="dashboard-period">
+      <label className="mb-2 block text-xs font-medium text-[#858585]" htmlFor={periodFieldId}>
         Period
       </label>
       {selectBlock}

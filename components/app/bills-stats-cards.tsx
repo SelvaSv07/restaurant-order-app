@@ -40,7 +40,7 @@ export function BillsStatsCards({
       {items.map(({ label, value, icon: Icon }) => (
         <div
           key={label}
-          className="flex flex-col gap-4 rounded-xl bg-white p-4 shadow-sm"
+          className="flex flex-col gap-4 rounded-xl bg-white p-4 shadow-[0_4px_24px_rgba(51,51,51,0.06)] ring-1 ring-[#ebebeb]"
         >
           <div className="flex items-start justify-between">
             <span className="flex size-[26px] items-center justify-center text-[#ff6b1e]">

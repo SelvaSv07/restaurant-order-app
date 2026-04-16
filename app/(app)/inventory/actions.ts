@@ -23,6 +23,7 @@ export async function addInventoryItem(formData: FormData) {
     reorderQty: Number.isFinite(reorderQty) ? Math.max(0, Math.floor(reorderQty)) : 0,
   });
   revalidatePath("/inventory");
+  revalidatePath("/settings/inventory");
 }
 
 export async function setInventoryQuantity(formData: FormData) {
@@ -34,4 +35,39 @@ export async function setInventoryQuantity(formData: FormData) {
   if (!row) return;
   await db.update(inventoryItems).set({ quantity: next }).where(eq(inventoryItems.id, id));
   revalidatePath("/inventory");
+  revalidatePath("/settings/inventory");
+}
+
+export async function updateInventoryItem(formData: FormData) {
+  const id = Number(formData.get("id"));
+  const name = String(formData.get("name") ?? "").trim();
+  const unit = String(formData.get("unit") ?? "").trim();
+  const category = String(formData.get("category") ?? "").trim() || "General";
+  const quantity = Number(formData.get("quantity"));
+  const maxStock = Number(formData.get("maxStock"));
+  const reorderQty = Number(formData.get("reorderQty"));
+  if (!Number.isFinite(id) || !name || !unit) return;
+  const [row] = await db.select().from(inventoryItems).where(eq(inventoryItems.id, id));
+  if (!row) return;
+  await db
+    .update(inventoryItems)
+    .set({
+      name,
+      unit,
+      category,
+      quantity: Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0,
+      maxStock: Number.isFinite(maxStock) && maxStock > 0 ? Math.floor(maxStock) : null,
+      reorderQty: Number.isFinite(reorderQty) ? Math.max(0, Math.floor(reorderQty)) : 0,
+    })
+    .where(eq(inventoryItems.id, id));
+  revalidatePath("/inventory");
+  revalidatePath("/settings/inventory");
+}
+
+export async function deleteInventoryItem(formData: FormData) {
+  const id = Number(formData.get("id"));
+  if (!Number.isFinite(id)) return;
+  await db.delete(inventoryItems).where(eq(inventoryItems.id, id));
+  revalidatePath("/inventory");
+  revalidatePath("/settings/inventory");
 }

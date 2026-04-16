@@ -1,54 +1,65 @@
-import {
-  endOfDay,
-  endOfMonth,
-  endOfYear,
-  format,
-  parseISO,
-  startOfDay,
-  startOfMonth,
-  startOfYear,
-  subDays,
-  subMonths,
-  subYears,
-} from "date-fns";
+import { subDays, subMonths, subYears } from "date-fns";
+import { TZDate } from "@date-fns/tz";
 
 export type PeriodPreset = "today" | "week" | "month" | "year" | "custom";
 
-const IST_OFFSET_MS = (5 * 60 + 30) * 60 * 1000;
+const IST = "Asia/Kolkata";
 
-function toISTDate(date: Date) {
-  return new Date(date.getTime() + IST_OFFSET_MS);
+function istNow(): TZDate {
+  return new TZDate(Date.now(), IST);
 }
 
-function fromISTDate(date: Date) {
-  return new Date(date.getTime() - IST_OFFSET_MS);
+/** Start of calendar day in Asia/Kolkata (00:00:00.000 IST). */
+function startOfIstDay(d: TZDate): Date {
+  return new TZDate(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0, IST);
+}
+
+/** End of calendar day in Asia/Kolkata (23:59:59.999 IST). */
+function endOfIstDay(d: TZDate): Date {
+  return new TZDate(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999, IST);
+}
+
+function startOfIstMonth(d: TZDate): Date {
+  return new TZDate(d.getFullYear(), d.getMonth(), 1, 0, 0, 0, 0, IST);
+}
+
+function endOfIstMonth(d: TZDate): Date {
+  return new TZDate(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999, IST);
+}
+
+function startOfIstYear(d: TZDate): Date {
+  return new TZDate(d.getFullYear(), 0, 1, 0, 0, 0, 0, IST);
+}
+
+function endOfIstYear(d: TZDate): Date {
+  return new TZDate(d.getFullYear(), 11, 31, 23, 59, 59, 999, IST);
 }
 
 export function resolvePresetRange(preset: Exclude<PeriodPreset, "custom">) {
-  const zoned = toISTDate(new Date());
+  const now = istNow();
 
   if (preset === "today") {
     return {
-      from: fromISTDate(startOfDay(zoned)),
-      to: fromISTDate(endOfDay(zoned)),
+      from: startOfIstDay(now),
+      to: endOfIstDay(now),
     };
   }
 
   if (preset === "week") {
     return {
-      from: fromISTDate(startOfDay(subDays(zoned, 6))),
-      to: fromISTDate(endOfDay(zoned)),
+      from: subDays(startOfIstDay(now), 6),
+      to: endOfIstDay(now),
     };
   }
 
   if (preset === "month") {
-    return { from: fromISTDate(startOfMonth(zoned)), to: fromISTDate(endOfMonth(zoned)) };
+    return { from: startOfIstMonth(now), to: endOfIstMonth(now) };
   }
 
-  return { from: fromISTDate(startOfYear(zoned)), to: fromISTDate(endOfYear(zoned)) };
+  return { from: startOfIstYear(now), to: endOfIstYear(now) };
 }
 
-/** Revenue / order charts: hourly for today (chart shows 12pm–12am only), daily otherwise, monthly for year. */
+/** Revenue / order charts: hourly for full IST day (today), daily otherwise, monthly for year. */
 export function chartBucketForPreset(period: PeriodPreset): "hour" | "day" | "month" {
   if (period === "today") return "hour";
   if (period === "year") return "month";
@@ -56,30 +67,33 @@ export function chartBucketForPreset(period: PeriodPreset): "hour" | "day" | "mo
 }
 
 export function resolvePreviousPresetRange(preset: Exclude<PeriodPreset, "custom">) {
-  const zoned = toISTDate(new Date());
+  const now = istNow();
 
   if (preset === "today") {
-    const prevDay = subDays(zoned, 1);
+    const prevInstant = subDays(now, 1);
+    const prev = new TZDate(prevInstant.getTime(), IST);
     return {
-      from: fromISTDate(startOfDay(prevDay)),
-      to: fromISTDate(endOfDay(prevDay)),
+      from: startOfIstDay(prev),
+      to: endOfIstDay(prev),
     };
   }
 
   if (preset === "week") {
     return {
-      from: fromISTDate(startOfDay(subDays(zoned, 13))),
-      to: fromISTDate(endOfDay(subDays(zoned, 7))),
+      from: subDays(startOfIstDay(now), 13),
+      to: endOfIstDay(new TZDate(subDays(now, 7).getTime(), IST)),
     };
   }
 
   if (preset === "month") {
-    const prev = subMonths(zoned, 1);
-    return { from: fromISTDate(startOfMonth(prev)), to: fromISTDate(endOfMonth(prev)) };
+    const prevInstant = subMonths(now, 1);
+    const prev = new TZDate(prevInstant.getTime(), IST);
+    return { from: startOfIstMonth(prev), to: endOfIstMonth(prev) };
   }
 
-  const prevY = subYears(zoned, 1);
-  return { from: fromISTDate(startOfYear(prevY)), to: fromISTDate(endOfYear(prevY)) };
+  const prevInstant = subYears(now, 1);
+  const prev = new TZDate(prevInstant.getTime(), IST);
+  return { from: startOfIstYear(prev), to: endOfIstYear(prev) };
 }
 
 export function resolvePreviousComparisonRange(
@@ -97,13 +111,31 @@ export function resolvePreviousComparisonRange(
   return { prevFrom: p.from, prevTo: p.to };
 }
 
+/** Inclusive IST calendar days from `yyyy-MM-dd` inputs (start 00:00 IST, end 23:59:59.999 IST). */
 export function resolveCustomRange(fromDate: string, toDate: string) {
-  const from = fromISTDate(startOfDay(toISTDate(parseISO(fromDate))));
-  const to = fromISTDate(endOfDay(toISTDate(parseISO(toDate))));
+  const [y0, m0, d0] = fromDate.split("-").map(Number);
+  const [y1, m1, d1] = toDate.split("-").map(Number);
+  if (
+    !Number.isFinite(y0) ||
+    !Number.isFinite(m0) ||
+    !Number.isFinite(d0) ||
+    !Number.isFinite(y1) ||
+    !Number.isFinite(m1) ||
+    !Number.isFinite(d1)
+  ) {
+    const today = istNow();
+    return { from: startOfIstDay(today), to: endOfIstDay(today) };
+  }
+  const from = new TZDate(y0, m0 - 1, d0, 0, 0, 0, 0, IST);
+  const to = new TZDate(y1, m1 - 1, d1, 23, 59, 59, 999, IST);
   return { from, to };
 }
 
-export function toDateInput(date: Date) {
-  return format(date, "yyyy-MM-dd");
+/** Format instant as `yyyy-MM-dd` in Asia/Kolkata (for labels / date inputs). */
+export function toDateInput(date: Date): string {
+  const d = new TZDate(date.getTime(), IST);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
-

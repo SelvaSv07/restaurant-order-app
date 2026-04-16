@@ -1,17 +1,8 @@
 import { BillsAnalyticsSection } from "@/components/app/bills-analytics-section";
-import { BillsPageHeader } from "@/components/app/bills-page-header";
+import { BillsHeader } from "@/components/app/bills-header";
 import { BillsRecentOrders, type BillsStatusTab } from "@/components/app/bills-recent-orders";
-import { TimeframeSelector } from "@/components/app/timeframe-selector";
+import { type PeriodPreset, resolveCustomRange, resolvePresetRange, toDateInput } from "@/lib/ist";
 import {
-  chartBucketForPreset,
-  type PeriodPreset,
-  resolveCustomRange,
-  resolvePresetRange,
-  toDateInput,
-} from "@/lib/ist";
-import { mergeCountSeries, TODAY_CHART_HOUR_WINDOW } from "@/lib/chart-series";
-import {
-  getBillCountByDay,
   getBillStatusCounts,
   getBillsListPage,
   getOrderTypeCounts,
@@ -135,11 +126,8 @@ export default async function BillsPage({ searchParams }: { searchParams: Promis
     voided: tabHref("voided"),
   };
 
-  const chartBucket = period === "custom" ? "day" : chartBucketForPreset(period);
-
-  const [stats, chartRows, orderTypes, listFirst] = await Promise.all([
+  const [stats, orderTypes, listFirst] = await Promise.all([
     getBillStatusCounts(range.from, range.to),
-    getBillCountByDay(range.from, range.to, chartBucket),
     getOrderTypeCounts(range.from, range.to),
     getBillsListPage({
       from: range.from,
@@ -165,41 +153,31 @@ export default async function BillsPage({ searchParams }: { searchParams: Promis
           pageSize: PAGE_SIZE,
         });
 
-  const chart = mergeCountSeries(
-    chartRows.map((r) => ({ day: r.day, count: Number(r.count) })),
-    range.from,
-    range.to,
-    chartBucket,
-    period === "today" && chartBucket === "hour" ? TODAY_CHART_HOUR_WINDOW : undefined,
-  );
-
   const base = buildBaseSearchParams(period, params.from, params.to, q);
   if (status !== "all") base.set("status", status);
 
   const pagination = buildPaginationItems(safePage, totalPages, base);
 
   return (
-    <div className="mx-auto flex max-w-[1200px] flex-col gap-6">
-      <BillsPageHeader searchQuery={q} />
-      <div className="rounded-xl border border-[#ebebeb] bg-white p-3 shadow-sm">
-        <TimeframeSelector />
+    <div className="flex flex-col gap-8">
+      <BillsHeader />
+      <div className="min-w-0 space-y-6">
+        <BillsAnalyticsSection
+          stats={stats}
+          orderTypes={orderTypes}
+          periodLabel={periodLabel(period, range.from, range.to)}
+        />
+        <BillsRecentOrders
+          rows={listResult.rows}
+          lineQtyByBillId={listResult.lineQtyByBillId}
+          total={listResult.total}
+          page={safePage}
+          pageSize={PAGE_SIZE}
+          status={status}
+          tabLinks={tabLinks}
+          pagination={pagination}
+        />
       </div>
-      <BillsAnalyticsSection
-        stats={stats}
-        chart={chart}
-        orderTypes={orderTypes}
-        periodLabel={periodLabel(period, range.from, range.to)}
-      />
-      <BillsRecentOrders
-        rows={listResult.rows}
-        lineQtyByBillId={listResult.lineQtyByBillId}
-        total={listResult.total}
-        page={safePage}
-        pageSize={PAGE_SIZE}
-        status={status}
-        tabLinks={tabLinks}
-        pagination={pagination}
-      />
     </div>
   );
 }

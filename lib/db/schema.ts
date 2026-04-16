@@ -86,6 +86,8 @@ export const billLines = sqliteTable("bill_lines", {
     .notNull()
     .default(false),
   lineTotalRupee: integer("line_total_rupee").notNull(),
+  /** Qty already included in a printed KOT (dine-in); remainder is "new" */
+  qtyKotSent: integer("qty_kot_sent").notNull().default(0),
 });
 
 export const inventoryItems = sqliteTable("inventory_items", {

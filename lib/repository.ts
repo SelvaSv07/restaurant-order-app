@@ -168,7 +168,10 @@ export async function getSettingsData() {
   return { cats, prods, business: business[0], printer: printer[0] };
 }
 
-export async function nextBillNumber() {
+type DbTx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+/** Next ORD-ddmmyy-### for today (IST). Must run on the same DB handle / transaction as the insert. */
+function nextBillNumberInTx(tx: DbTx) {
   const todayPrefix = new Intl.DateTimeFormat("en-IN", {
     year: "2-digit",
     month: "2-digit",
@@ -178,58 +181,76 @@ export async function nextBillNumber() {
     .format(new Date())
     .replace(/\//g, "");
 
-  const match = await db
+  const match = tx
     .select({ billNumber: bills.billNumber })
     .from(bills)
     .where(sql`${bills.billNumber} like ${`${todayPrefix}-%`}`)
     .orderBy(desc(bills.billNumber))
-    .limit(1);
+    .limit(1)
+    .all();
 
   const current = match[0]?.billNumber;
   const seq = current ? Number.parseInt(current.split("-")[1] ?? "0", 10) + 1 : 1;
   return `${todayPrefix}-${String(seq).padStart(3, "0")}`;
 }
 
-export async function getOpenTakeawayBill() {
-  const existing = await db
-    .select()
-    .from(bills)
-    .where(and(eq(bills.status, "draft"), eq(bills.orderType, "takeaway"), sql`${bills.tableId} is null`))
-    .limit(1);
+/**
+ * Ensures a single open takeaway draft. Uses an immediate transaction so concurrent
+ * page loads cannot each insert a new empty bill (race → duplicate ghost drafts).
+ */
+export function getOpenTakeawayBill() {
+  return db.transaction(
+    (tx) => {
+      const existing = tx
+        .select()
+        .from(bills)
+        .where(and(eq(bills.status, "draft"), eq(bills.orderType, "takeaway"), sql`${bills.tableId} is null`))
+        .limit(1)
+        .all();
+      if (existing[0]) return existing[0];
 
-  if (existing[0]) return existing[0];
-
-  const billNumber = await nextBillNumber();
-  const inserted = await db
-    .insert(bills)
-    .values({
-      billNumber,
-      status: "draft",
-      orderType: "takeaway",
-    })
-    .returning();
-  return inserted[0];
+      const billNumber = nextBillNumberInTx(tx);
+      const inserted = tx
+        .insert(bills)
+        .values({
+          billNumber,
+          status: "draft",
+          orderType: "takeaway",
+        })
+        .returning()
+        .all();
+      return inserted[0]!;
+    },
+    { behavior: "immediate" },
+  );
 }
 
-export async function getOpenTableBill(tableId: number) {
-  const existing = await db
-    .select()
-    .from(bills)
-    .where(and(eq(bills.status, "draft"), eq(bills.orderType, "dine_in"), eq(bills.tableId, tableId)))
-    .limit(1);
+export function getOpenTableBill(tableId: number) {
+  return db.transaction(
+    (tx) => {
+      const existing = tx
+        .select()
+        .from(bills)
+        .where(and(eq(bills.status, "draft"), eq(bills.orderType, "dine_in"), eq(bills.tableId, tableId)))
+        .limit(1)
+        .all();
+      if (existing[0]) return existing[0];
 
-  if (existing[0]) return existing[0];
-  const billNumber = await nextBillNumber();
-  const inserted = await db
-    .insert(bills)
-    .values({
-      billNumber,
-      status: "draft",
-      orderType: "dine_in",
-      tableId,
-    })
-    .returning();
-  return inserted[0];
+      const billNumber = nextBillNumberInTx(tx);
+      const inserted = tx
+        .insert(bills)
+        .values({
+          billNumber,
+          status: "draft",
+          orderType: "dine_in",
+          tableId,
+        })
+        .returning()
+        .all();
+      return inserted[0]!;
+    },
+    { behavior: "immediate" },
+  );
 }
 
 export async function getBillWithLines(billId: number) {

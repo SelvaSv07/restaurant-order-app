@@ -77,7 +77,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </div>
 
         <div className="flex min-w-0 flex-col gap-6">
-          <DashboardPanel title="Total Revenue" titleAddon={periodLabel} subtitle="Performance in selected period">
+          <DashboardPanel
+            title="Total Revenue"
+            titleAddon={periodLabel}
+            subtitle="Selected period · completed bills only (drafts excluded)"
+          >
             <RevenueChart data={data.chart} chartBucket={chartBucket} />
           </DashboardPanel>
           <div className="grid min-w-0 gap-6 md:grid-cols-2">

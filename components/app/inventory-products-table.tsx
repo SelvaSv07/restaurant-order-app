@@ -2,20 +2,22 @@ import { ArrowUpDown } from "lucide-react";
 import type { InferSelectModel } from "drizzle-orm";
 
 import { InventoryPagination } from "@/components/app/inventory-pagination";
-import { InventoryReorderButton } from "@/components/app/inventory-reorder-button";
 import { InventoryStatusBadge } from "@/components/app/inventory-status-badge";
-import { UpdateInventoryStockDialog } from "@/components/app/update-inventory-stock-dialog";
+import { InventoryUpdateStockDialog } from "@/components/app/inventory-update-stock-dialog";
 import { inventoryItems } from "@/lib/db/schema";
-import { getInventoryStatus, stockFillPercent } from "@/lib/inventory";
+import { getInventoryStatus } from "@/lib/inventory";
 
 type Row = InferSelectModel<typeof inventoryItems>;
 
-function SortLabel({ children }: { children: React.ReactNode }) {
+function SortLabel({ children, align = "left" }: { children: React.ReactNode; align?: "left" | "center" | "right" }) {
+  const alignClass = align === "center" ? "justify-center" : align === "right" ? "justify-end" : "justify-start";
   return (
-    <span className="inline-flex items-center gap-1 text-xs font-normal text-[#858585]">
-      {children}
-      <ArrowUpDown className="size-3.5 shrink-0 opacity-70" aria-hidden />
-    </span>
+    <div className={`flex ${alignClass}`}>
+      <span className="inline-flex items-center gap-1 text-xs font-normal text-[#858585]">
+        {children}
+        <ArrowUpDown className="size-3.5 shrink-0 opacity-70" aria-hidden />
+      </span>
+    </div>
   );
 }
 
@@ -35,58 +37,32 @@ export function InventoryProductsTable({
   return (
     <div className="w-full min-w-0">
       <div className="overflow-x-auto rounded-xl border border-[#ebebeb] bg-white">
-        <div className="min-w-[880px]">
-          <div className="grid grid-cols-[28px_1fr_140px_108px_128px_96px_168px] items-center gap-3 border-b border-[#ebebeb] px-4 py-3.5">
-            <span className="inline-flex size-3 rounded border border-[#dedede] bg-white" aria-hidden />
+        <div className="min-w-[640px]">
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(112px,120px)_minmax(88px,96px)_minmax(100px,120px)] items-center gap-x-3 gap-y-1 border-b border-[#ebebeb] px-4 py-3.5">
             <SortLabel>Item</SortLabel>
-            <SortLabel>Category</SortLabel>
-            <SortLabel>Status</SortLabel>
-            <SortLabel>Qty in Stock</SortLabel>
-            <SortLabel>Qty in Reorder</SortLabel>
-            <SortLabel>Action</SortLabel>
+            <SortLabel align="center">Status</SortLabel>
+            <SortLabel align="right">Qty in Stock</SortLabel>
+            <SortLabel align="right">Action</SortLabel>
           </div>
           {rows.length === 0 ? (
             <p className="px-4 py-12 text-center text-sm text-[#858585]">No items match your filters.</p>
           ) : (
             rows.map((item) => {
               const status = getInventoryStatus(item);
-              const pct = stockFillPercent(item);
               return (
                 <div
                   key={item.id}
-                  className="grid grid-cols-[28px_1fr_140px_108px_128px_96px_168px] items-center gap-3 border-b border-[#ebebeb] px-4 py-3 last:border-b-0"
+                  className="grid grid-cols-[minmax(0,1fr)_minmax(112px,120px)_minmax(88px,96px)_minmax(100px,120px)] items-center gap-x-3 gap-y-2 border-b border-[#ebebeb] px-4 py-3 last:border-b-0"
                 >
-                  <input
-                    type="checkbox"
-                    className="size-3 rounded border-[#dedede] accent-[#ff6b1e]"
-                    aria-label={`Select ${item.name}`}
-                  />
-                  <div className="flex min-w-0 items-center gap-2">
-                    <div
-                      className="size-9 shrink-0 rounded-lg bg-[#f7f7f7] ring-1 ring-inset ring-[#dedede]"
-                      aria-hidden
-                    />
-                    <span className="truncate text-sm text-[#333]">{item.name}</span>
-                  </div>
-                  <span className="truncate text-sm text-[#333]">{item.category}</span>
-                  <div className="flex min-w-0">
+                  <span className="min-w-0 truncate text-left text-sm text-[#333]">{item.name}</span>
+                  <div className="flex justify-center">
                     <InventoryStatusBadge status={status} />
                   </div>
-                  <div className="flex min-w-0 items-center gap-2">
-                    <div className="h-[5px] min-w-0 flex-1 overflow-hidden rounded bg-[#ebebeb]">
-                      <div
-                        className="h-full rounded bg-[#ff6b1e]"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <span className="w-7 shrink-0 text-right text-sm tabular-nums text-[#333]">
-                      {item.quantity}
-                    </span>
-                  </div>
-                  <span className="text-center text-sm tabular-nums text-[#333]">{item.reorderQty}</span>
-                  <div className="flex flex-wrap gap-1">
-                    <InventoryReorderButton itemName={item.name} />
-                    <UpdateInventoryStockDialog
+                  <span className="text-right text-sm tabular-nums text-[#333]">
+                    {item.quantity} {item.unit}
+                  </span>
+                  <div className="flex w-full justify-end">
+                    <InventoryUpdateStockDialog
                       id={item.id}
                       name={item.name}
                       unit={item.unit}
