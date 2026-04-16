@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1776322006327,
+      "tag": "0000_same_slyde",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1776322007000,
+      "tag": "0001_inventory_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1776400000000,
+      "tag": "0002_product_category_media",
+      "breakpoints": true
+    }
+  ]
+}
