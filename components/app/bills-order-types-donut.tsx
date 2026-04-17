@@ -27,9 +27,9 @@ export function BillsOrderTypesDonut({
   }
 
   return (
-    <div className="flex flex-1 flex-col items-stretch gap-6 sm:flex-row sm:items-center">
+    <div className="flex min-w-0 flex-1 flex-col items-stretch gap-6 sm:flex-row sm:items-center">
       <div className="relative mx-auto size-[152px] shrink-0">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width={152} height={152}>
           <PieChart>
             <Pie
               data={data}

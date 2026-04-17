@@ -11,3 +11,6 @@ sqlite.pragma("journal_mode = WAL");
 export const db = drizzle(sqlite, { schema });
 export type DbClient = typeof db;
 
+/** Raw better-sqlite3 instance for bootstrap DDL when the file predates a migration. */
+export const sqliteRaw = sqlite;
+

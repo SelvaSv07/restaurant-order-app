@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { db, sqliteRaw } from "@/lib/db";
 import {
   billLines,
   bills,
@@ -19,7 +19,27 @@ import { percentageDiscount } from "@/lib/money";
 /** Exclude empty carts: no lines or total line qty is 0. */
 const billHasPositiveLineQty = sql`(select coalesce(sum(${billLines.qty}), 0) from ${billLines} where ${billLines.billId} = ${bills.id}) > 0`;
 
+/** Apply printer column DDL if missing (older DB files; keeps `next build` prerender working). */
+function ensurePrinterDeviceColumnsIfMissing() {
+  try {
+    sqliteRaw.exec(
+      `ALTER TABLE printer_settings ADD COLUMN receipt_printer_name text NOT NULL DEFAULT ''`,
+    );
+  } catch (e) {
+    const m = e instanceof Error ? e.message : String(e);
+    if (!m.includes("duplicate column")) throw e;
+  }
+  try {
+    sqliteRaw.exec(`ALTER TABLE printer_settings ADD COLUMN kot_printer_name text NOT NULL DEFAULT ''`);
+  } catch (e) {
+    const m = e instanceof Error ? e.message : String(e);
+    if (!m.includes("duplicate column")) throw e;
+  }
+}
+
 export async function ensureDefaults() {
+  ensurePrinterDeviceColumnsIfMissing();
+
   const business = await db.select().from(businessSettings).where(eq(businessSettings.id, 1));
   if (business.length === 0) {
     await db.insert(businessSettings).values({ id: 1 });

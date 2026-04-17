@@ -1,84 +1,111 @@
 import { toast } from "sonner";
 
-function getElectronPrint(): Window["electronPrint"] {
-  if (typeof window === "undefined") return undefined;
-  return window.electronPrint;
+function isElectronApp(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.navigator.userAgent.includes("Electron");
 }
 
-/** The embedded Next server listens on 127.0.0.1; use that host so print IPC accepts the URL (avoids [::1] quirks). */
+/** Embedded Next server listens on 127.0.0.1; use that host for print URLs in Electron. */
 function resolvePrintBaseUrl(): string {
   if (typeof window === "undefined") return "";
-  if (!window.electronPrint) return window.location.origin;
   const port = window.location.port;
-  if (port) return `http://127.0.0.1:${port}`;
-  return "http://127.0.0.1";
-}
-
-async function fetchPrinterDeviceNames(): Promise<{ receiptPrinterName: string; kotPrinterName: string }> {
-  const res = await fetch("/api/settings/printer");
-  if (!res.ok) throw new Error("Failed to load printer settings");
-  return res.json();
-}
-
-export async function printReceiptToConfiguredDevice(billId: number): Promise<boolean> {
-  const url = `${resolvePrintBaseUrl()}/print/${billId}`;
-  const ep = getElectronPrint();
-  const { receiptPrinterName } = await fetchPrinterDeviceNames();
-  const deviceName = receiptPrinterName.trim() || undefined;
-
-  if (ep) {
-    const result = await ep.printUrl(url, { deviceName });
-    if (!result.ok) {
-      toast.error("Receipt print failed", { description: result.error ?? "Unknown error" });
-      return false;
-    }
-    return true;
+  if (isElectronApp() && port) {
+    return `http://127.0.0.1:${port}`;
   }
+  return window.location.origin;
+}
 
-  window.open(url, "_blank", "noopener,noreferrer");
+/** `noopener` clears `window.opener` in the child — KOT browser flow uses postMessage to opener. */
+function openPrintWindow(url: string, opts?: { retainOpener?: boolean }): boolean {
+  const retainOpener = opts?.retainOpener === true;
+  const opened = retainOpener
+    ? window.open(url, "_blank")
+    : window.open(url, "_blank", "noopener,noreferrer");
+  if (!opened) {
+    toast.error("Pop-up blocked", { description: "Allow pop-ups for this app to print." });
+    return false;
+  }
   return true;
 }
 
-export async function printKotToConfiguredDevice(billId: number): Promise<boolean> {
-  const url = `${resolvePrintBaseUrl()}/print/${billId}/kot`;
-  const ep = getElectronPrint();
-  const { kotPrinterName } = await fetchPrinterDeviceNames();
-  const deviceName = kotPrinterName.trim() || undefined;
+/**
+ * Send raw ESC/POS bytes to the configured printer via server-side API.
+ * This bypasses Chromium's unreliable webContents.print on Windows.
+ */
+async function printViaRawApi(
+  billId: number,
+  type: "receipt" | "kot",
+): Promise<{ ok: boolean; error?: string }> {
+  const endpoint =
+    type === "receipt" ? `/api/bills/${billId}/print` : `/api/bills/${billId}/print-kot`;
+  try {
+    const res = await fetch(endpoint, { method: "POST" });
+    const json = (await res.json()) as { ok: boolean; error?: string; message?: string };
+    return { ok: json.ok, error: json.error ?? json.message };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Network error" };
+  }
+}
 
-  if (ep) {
-    const result = await ep.printUrl(url, { deviceName });
-    if (!result.ok) {
-      toast.error("KOT print failed", { description: result.error ?? "Unknown error" });
-      return false;
+export async function printReceiptToConfiguredDevice(billId: number): Promise<boolean> {
+  if (isElectronApp()) {
+    const result = await printViaRawApi(billId, "receipt");
+    if (result.ok) {
+      toast.success("Receipt sent to printer");
+      return true;
     }
-    return true;
+    toast.error("Receipt print failed", {
+      description: result.error ?? "Check Settings → Printer and the printer connection.",
+    });
+    return false;
   }
 
-  return new Promise((resolve) => {
-    const opened = window.open(url, "_blank", "noopener,noreferrer");
-    if (!opened) {
-      toast.error("Pop-up blocked", { description: "Allow pop-ups to print KOT." });
-      resolve(false);
-      return;
+  const base = resolvePrintBaseUrl();
+  const url = `${base}/print/${billId}`;
+  const ok = openPrintWindow(url);
+  if (ok) {
+    toast.success("Print window opened");
+  }
+  return ok;
+}
+
+export async function printKotToConfiguredDevice(billId: number): Promise<boolean> {
+  if (isElectronApp()) {
+    const result = await printViaRawApi(billId, "kot");
+    if (result.ok) {
+      toast.success("KOT sent to printer");
+      return true;
     }
+    toast.error("KOT print failed", {
+      description: result.error ?? "Check Settings → Printer and the KOT device.",
+    });
+    return false;
+  }
+
+  const base = resolvePrintBaseUrl();
+  const url = `${base}/print/${billId}/kot`;
+  const ok = openPrintWindow(url, { retainOpener: true });
+  if (!ok) return false;
+  toast.success("KOT print window opened");
+
+  return new Promise((resolve) => {
     let settled = false;
-    let timeoutId: ReturnType<typeof window.setTimeout>;
     const onMessage = (e: MessageEvent) => {
       if (e.data?.type === "kot-print-ready" && e.data.billId === billId) {
         finish(true);
       }
     };
-    const finish = (ok: boolean) => {
+    const finish = (success: boolean) => {
       if (settled) return;
       settled = true;
       window.clearTimeout(timeoutId);
       window.removeEventListener("message", onMessage);
-      resolve(ok);
+      resolve(success);
     };
     window.addEventListener("message", onMessage);
-    timeoutId = window.setTimeout(() => {
-      toast.error("KOT print timed out", { description: "Reload and try again." });
+    const timeoutId = window.setTimeout(() => {
+      toast.error("KOT window timed out", { description: "Close the print window and try again." });
       finish(false);
-    }, 12_000);
+    }, 30_000);
   });
 }

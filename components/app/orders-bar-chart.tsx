@@ -32,8 +32,8 @@ export function OrdersBarChart({ data }: { data: Point[] }) {
   }
 
   return (
-    <div className="h-[190px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="w-full min-w-0">
+      <ResponsiveContainer width="100%" height={190}>
         <BarChart data={rows} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="#f0f0f0" vertical={false} />
           <XAxis

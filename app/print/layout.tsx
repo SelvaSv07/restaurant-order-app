@@ -1,3 +1,5 @@
+import { PrintChrome } from "@/components/print/print-chrome";
+
 export default function PrintLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <PrintChrome>{children}</PrintChrome>;
 }

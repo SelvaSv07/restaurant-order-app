@@ -7,17 +7,19 @@
   "homepage": "./",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run db:migrate && next build",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:clear-bills": "node scripts/clear-bills.mjs",
     "copy:standalone-assets": "node scripts/copy-standalone-assets.cjs",
-    "build:electron": "next build && node scripts/copy-standalone-assets.cjs",
+    "build:electron": "npm run db:migrate && next build && node scripts/copy-standalone-assets.cjs",
     "setup:embedded-node": "node scripts/download-embedded-node.mjs",
     "clean:dist": "node scripts/clean-dist.cjs",
     "electron:dev": "electron .",
+    "electron:start": "cross-env RESTAURANT_NEXT_MODE=start electron .",
+    "electron:preview": "npm run build && cross-env RESTAURANT_NEXT_MODE=start electron .",
     "electron:dist": "npm run clean:dist && npm run build:electron && npm run setup:embedded-node && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win"
   },
   "dependencies": {

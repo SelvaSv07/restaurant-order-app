@@ -1,2 +1,2 @@
-export { db } from "@/lib/db/index";
+export { db, sqliteRaw } from "@/lib/db/index";
 

@@ -24,9 +24,9 @@ export function CategoryDonutChart({ data }: { data: Row[] }) {
   }
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex min-w-0 w-full items-center gap-4">
       <div className="relative h-[180px] w-[180px] shrink-0">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width={180} height={180}>
           <PieChart>
             <Pie
               data={chartData}

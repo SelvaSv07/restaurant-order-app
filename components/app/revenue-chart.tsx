@@ -66,14 +66,13 @@ export function RevenueChart({
   }, [data.length, isHourly]);
 
   return (
-    <div className="w-full">
-      <div className="h-[220px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{ top: 4, right: 2, left: -18, bottom: 2 }}
-            barCategoryGap={isHourly ? "10%" : "18%"}
-          >
+    <div className="w-full min-w-0">
+      <ResponsiveContainer width="100%" height={220}>
+        <BarChart
+          data={data}
+          margin={{ top: 4, right: 2, left: -18, bottom: 2 }}
+          barCategoryGap={isHourly ? "10%" : "18%"}
+        >
             <CartesianGrid stroke="#ebebeb" strokeDasharray="3 3" vertical horizontal />
             <XAxis
               dataKey="day"
@@ -106,16 +105,15 @@ export function RevenueChart({
                 fontSize: 12,
               }}
             />
-            <Bar
-              dataKey="totalRupee"
-              name="Revenue"
-              fill="#ff6b1e"
-              radius={[6, 6, 0, 0]}
-              maxBarSize={isHourly ? 44 : 36}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+          <Bar
+            dataKey="totalRupee"
+            name="Revenue"
+            fill="#ff6b1e"
+            radius={[6, 6, 0, 0]}
+            maxBarSize={isHourly ? 44 : 36}
+          />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }

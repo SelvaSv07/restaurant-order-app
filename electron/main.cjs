@@ -111,6 +111,26 @@ function spawnNextServer(appRoot, port, dbPath) {
     if (!fs.existsSync(nextCli)) {
       throw new Error(`Next CLI not found at ${nextCli}`);
     }
+    /** `start` = production. With `output: "standalone"`, `next start` is wrong — use `node server.js` in `.next/standalone`. */
+    const useProdServer = process.env.RESTAURANT_NEXT_MODE === "start";
+    if (useProdServer) {
+      const standaloneDir = path.join(appRoot, ".next", "standalone");
+      const serverJs = path.join(standaloneDir, "server.js");
+      if (!fs.existsSync(serverJs)) {
+        throw new Error(
+          "Standalone server missing (.next/standalone/server.js). Run: npm run build",
+        );
+      }
+      env.NODE_ENV = "production";
+      env.HOSTNAME = "127.0.0.1";
+      env.HOST = "127.0.0.1";
+      return spawn("node", ["server.js"], {
+        cwd: standaloneDir,
+        env,
+        stdio: "inherit",
+        windowsHide: true,
+      });
+    }
     return spawn("node", [nextCli, "dev", "-H", "127.0.0.1", "-p", String(port)], {
       cwd: appRoot,
       env,
@@ -186,22 +206,75 @@ function isAllowedPrintUrl(urlString) {
   }
 }
 
-/**
- * Hidden 0×0 windows often print blank; Next/Turbopack needs time to paint.
- * @param {import('electron').BrowserWindow} win
- * @param {{ silent: boolean; deviceName?: string }} first
- */
-function printBillWindow(win, first) {
+function printBillWindow(win, opts) {
   return new Promise((resolve) => {
-    const opts = {
-      silent: first.silent,
-      printBackground: true,
-      ...(first.deviceName ? { deviceName: first.deviceName } : {}),
-    };
-    win.webContents.print(opts, (success, failureReason) => {
-      resolve({ ok: success, error: failureReason });
-    });
+    win.webContents.print(
+      {
+        silent: opts.silent,
+        printBackground: true,
+        ...(opts.deviceName ? { deviceName: opts.deviceName } : {}),
+      },
+      (success, failureReason) => {
+        resolve({ ok: success, error: failureReason });
+      },
+    );
   });
+}
+
+function printBillWindowWithTimeout(win, opts, ms) {
+  return Promise.race([
+    printBillWindow(win, opts),
+    new Promise((resolve) =>
+      setTimeout(
+        () => resolve({ ok: false, error: `Print timed out after ${Math.round(ms / 1000)}s` }),
+        ms,
+      ),
+    ),
+  ]);
+}
+
+const PRINT_SILENT_TIMEOUT_MS = 25_000;
+
+/** Wait until receipt/KOT text is in the DOM (Turbopack can finish load early). */
+async function waitForPrintBodyText(win) {
+  const isDevServer = process.env.RESTAURANT_NEXT_MODE !== "start";
+  const maxAttempts = isDevServer ? 28 : 14;
+  const delayMs = 400;
+  for (let i = 0; i < maxAttempts; i++) {
+    try {
+      const ok = await win.webContents.executeJavaScript(
+        `(function(){
+          var t = (document.body && document.body.innerText) ? document.body.innerText : '';
+          return t.replace(/\\s+/g,' ').trim().length > 20;
+        })()`,
+        true,
+      );
+      if (ok) return;
+    } catch {
+      // ignore
+    }
+    await new Promise((r) => setTimeout(r, delayMs));
+  }
+}
+
+/**
+ * Match stored name from settings to Chromium's device name (same as Settings dropdown `p.name`).
+ */
+async function resolveDeviceName(deviceNameRaw) {
+  const trimmed = typeof deviceNameRaw === "string" ? deviceNameRaw.trim() : "";
+  if (trimmed === "") return undefined;
+  if (!mainWindow) return trimmed;
+  let list = [];
+  try {
+    list = await mainWindow.webContents.getPrintersAsync();
+  } catch {
+    return trimmed;
+  }
+  const exact = list.find((p) => p.name === trimmed);
+  if (exact) return exact.name;
+  const byDisplay = list.find((p) => p.displayName && p.displayName.trim() === trimmed);
+  if (byDisplay) return byDisplay.name;
+  return trimmed;
 }
 
 function registerPrintIpc() {
@@ -218,15 +291,22 @@ function registerPrintIpc() {
     if (!isAllowedPrintUrl(urlString)) {
       return {
         ok: false,
-        error: `Print URL not allowed (use 127.0.0.1): ${urlString}`,
+        error: `Print URL not allowed: ${urlString}`,
       };
     }
-    const deviceNameRaw =
-      typeof options?.deviceName === "string" ? options.deviceName.trim() : "";
-    const deviceName = deviceNameRaw !== "" ? deviceNameRaw : undefined;
+
+    let loadUrlString = urlString;
+    try {
+      const u = new URL(urlString);
+      u.searchParams.set("silent", "1");
+      loadUrlString = u.toString();
+    } catch (e) {
+      return { ok: false, error: e instanceof Error ? e.message : String(e) };
+    }
+
+    const deviceName = await resolveDeviceName(options?.deviceName);
 
     const session = mainWindow?.webContents.session;
-
     const win = new BrowserWindow({
       show: false,
       width: 900,
@@ -249,7 +329,7 @@ function registerPrintIpc() {
     };
 
     try {
-      await win.loadURL(urlString);
+      await win.loadURL(loadUrlString);
     } catch (e) {
       cleanup();
       return { ok: false, error: e instanceof Error ? e.message : String(e) };
@@ -274,30 +354,73 @@ function registerPrintIpc() {
       // still try to print
     }
 
-    await new Promise((r) => setTimeout(r, 1200));
-
+    // On Windows, offscreen/hidden windows are not composited by Chromium so
+    // webContents.print produces blank output.  Keep the print window on-screen
+    // (behind the main window) so it gets painted, then print silently.
     try {
-      win.showInactive();
+      if (process.platform === "win32") {
+        win.showInactive();
+      } else {
+        win.setBounds({ x: -2400, y: 0, width: 900, height: 2000 });
+        win.showInactive();
+      }
     } catch {
       try {
-        win.show();
+        win.showInactive();
       } catch {
         // ignore
       }
     }
-    await new Promise((r) => setTimeout(r, 150));
 
-    let result = await printBillWindow(win, { silent: true, deviceName });
-    if (!result.ok && deviceName) {
-      await new Promise((r) => setTimeout(r, 200));
-      result = await printBillWindow(win, {
-        silent: true,
-        deviceName: undefined,
-      });
+    await waitForPrintBodyText(win);
+
+    // Wait for Chromium to actually paint a frame before printing.
+    try {
+      await win.webContents.executeJavaScript(
+        `new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))`,
+      );
+    } catch {
+      // ignore
     }
+
+    const isDevServer = process.env.RESTAURANT_NEXT_MODE !== "start";
+    const settleMs = isDevServer ? 3200 : 1800;
+    await new Promise((r) => setTimeout(r, settleMs));
+
+    let result = await printBillWindowWithTimeout(
+      win,
+      { silent: true, deviceName },
+      PRINT_SILENT_TIMEOUT_MS,
+    );
+
+    if (!result.ok && deviceName) {
+      console.warn("[electron print:url] retry default printer:", result.error);
+      await new Promise((r) => setTimeout(r, 300));
+      result = await printBillWindowWithTimeout(
+        win,
+        { silent: true, deviceName: undefined },
+        PRINT_SILENT_TIMEOUT_MS,
+      );
+    }
+
+    if (!result.ok && process.env.RESTAURANT_PRINT_FALLBACK_DIALOG === "1") {
+      console.warn("[electron print:url] silent failed, opening print dialog:", result.error);
+      try {
+        win.show();
+        win.focus();
+      } catch {
+        // ignore
+      }
+      await new Promise((r) => setTimeout(r, 400));
+      result = await printBillWindowWithTimeout(
+        win,
+        { silent: false, deviceName },
+        180_000,
+      );
+    }
+
     if (!result.ok) {
-      await new Promise((r) => setTimeout(r, 200));
-      result = await printBillWindow(win, { silent: false, deviceName });
+      console.error("[electron print:url] failed:", loadUrlString, result.error);
     }
 
     cleanup();
@@ -316,6 +439,38 @@ function createWindow(url) {
       preload: fs.existsSync(preloadPath) ? preloadPath : undefined,
     },
   });
+
+  /** Allow receipt/KOT print URLs to open in a normal window so Chromium's print dialog runs (webContents.print is unreliable on Windows). */
+  mainWindow.webContents.setWindowOpenHandler((details) => {
+    try {
+      const u = new URL(details.url);
+      const h = u.hostname;
+      if (h !== "127.0.0.1" && h !== "localhost" && h !== "::1") {
+        return { action: "deny" };
+      }
+      if (!u.pathname.includes("/print/")) {
+        return { action: "deny" };
+      }
+      const session = mainWindow?.webContents.session;
+      return {
+        action: "allow",
+        overrideBrowserWindowOptions: {
+          width: 420,
+          height: 760,
+          autoHideMenuBar: true,
+          backgroundColor: "#ffffff",
+          webPreferences: {
+            contextIsolation: true,
+            nodeIntegration: false,
+            ...(session ? { session } : {}),
+          },
+        },
+      };
+    } catch {
+      return { action: "deny" };
+    }
+  });
+
   mainWindow.on("close", () => {
     killServerProcess();
   });
