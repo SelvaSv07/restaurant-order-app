@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CircleMinus, Trash2, TriangleAlert } from "lucide-react";
+import { CircleMinus, Minus, Trash2, TriangleAlert } from "lucide-react";
 
 import { adjustDineInLineQtyAction, removeDineInLineAction } from "@/app/(app)/dine-in/actions";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,9 @@ type DecreaseProps = {
   qtyKotSent: number;
   className?: string;
   iconSizeClass?: string;
+  /** Plain bar minus (no circle), e.g. image overlay */
+  plainMinus?: boolean;
+  minusStrokeWidth?: number;
   "aria-label"?: string;
 };
 
@@ -119,6 +122,8 @@ export function DineInDecreaseWithConfirm({
   qtyKotSent,
   className,
   iconSizeClass = "size-6",
+  plainMinus = false,
+  minusStrokeWidth = 2.75,
   "aria-label": ariaLabel = "Decrease quantity",
 }: DecreaseProps) {
   const [open, setOpen] = useState(false);
@@ -130,6 +135,12 @@ export function DineInDecreaseWithConfirm({
     fd.set("delta", "-1");
     startTransition(() => void adjustDineInLineQtyAction(fd));
   };
+
+  const minusIcon = plainMinus ? (
+    <Minus className={iconSizeClass} strokeWidth={minusStrokeWidth} />
+  ) : (
+    <CircleMinus className={iconSizeClass} strokeWidth={1.5} />
+  );
 
   return (
     <>
@@ -143,7 +154,7 @@ export function DineInDecreaseWithConfirm({
           else run();
         }}
       >
-        <CircleMinus className={iconSizeClass} strokeWidth={1.5} />
+        {minusIcon}
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>

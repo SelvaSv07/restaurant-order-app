@@ -30,51 +30,49 @@ export function InventoryToolbar() {
   }
 
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-end lg:gap-8">
-      <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2.5">
-        <form
-          className="flex min-w-0 flex-1 items-center gap-1.5 rounded-[10px] bg-[#f7f7f7] px-3 py-2 sm:max-w-[237px] sm:flex-initial"
-          action={pathname}
-          method="get"
-        >
-          {st !== "all" ? <input type="hidden" name="status" value={st} /> : null}
-          <Search className="size-4 shrink-0 text-[#858585]" aria-hidden />
-          <input
-            name="q"
-            defaultValue={q}
-            placeholder="Search for item"
-            className="min-w-0 flex-1 bg-transparent text-xs text-[#333] outline-none placeholder:text-[#858585]"
-          />
-        </form>
+    <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+      <form
+        className="flex min-w-0 max-w-full items-center gap-1.5 rounded-lg border border-[#ebebeb] bg-[#fafafa] px-3 py-2 shadow-none sm:max-w-[280px] sm:flex-1 lg:max-w-[320px]"
+        action={pathname}
+        method="get"
+      >
+        {st !== "all" ? <input type="hidden" name="status" value={st} /> : null}
+        <Search className="size-4 shrink-0 text-[#858585]" aria-hidden />
+        <input
+          name="q"
+          defaultValue={q}
+          placeholder="Search for item"
+          className="min-w-0 flex-1 bg-transparent text-xs text-[#333] outline-none placeholder:text-[#858585]"
+        />
+      </form>
 
-        <div className="inline-flex items-center rounded-[10px] px-0.5 py-2 text-xs font-medium text-[#333]">
-          <span className="sr-only">Status</span>
-          <Select
-            value={st}
-            onValueChange={(v) => {
-              if (v == null) return;
-              router.push(
-                href({
-                  status: v === "all" ? null : v,
-                  page: null,
-                }),
-              );
-            }}
+      <div className="inline-flex shrink-0 items-center text-xs font-medium text-[#333]">
+        <span className="sr-only">Status</span>
+        <Select
+          value={st}
+          onValueChange={(v) => {
+            if (v == null) return;
+            router.push(
+              href({
+                status: v === "all" ? null : v,
+                page: null,
+              }),
+            );
+          }}
+        >
+          <SelectTrigger
+            className="h-8 rounded-lg border border-[#ebebeb] bg-white px-3 shadow-none hover:bg-[#f7f7f7] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"
+            size="sm"
           >
-            <SelectTrigger
-              className="h-8 border-0 bg-transparent px-2.5 py-1 shadow-none ring-0 focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"
-              size="sm"
-            >
-              <SelectValue>{STOCK_STATUS_LABEL[st] ?? st}</SelectValue>
-            </SelectTrigger>
-            <SelectContent align="end">
-              <SelectItem value="all">{STOCK_STATUS_LABEL.all}</SelectItem>
-              <SelectItem value="available">{STOCK_STATUS_LABEL.available}</SelectItem>
-              <SelectItem value="low">{STOCK_STATUS_LABEL.low}</SelectItem>
-              <SelectItem value="out">{STOCK_STATUS_LABEL.out}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            <SelectValue>{STOCK_STATUS_LABEL[st] ?? st}</SelectValue>
+          </SelectTrigger>
+          <SelectContent align="end">
+            <SelectItem value="all">{STOCK_STATUS_LABEL.all}</SelectItem>
+            <SelectItem value="available">{STOCK_STATUS_LABEL.available}</SelectItem>
+            <SelectItem value="low">{STOCK_STATUS_LABEL.low}</SelectItem>
+            <SelectItem value="out">{STOCK_STATUS_LABEL.out}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

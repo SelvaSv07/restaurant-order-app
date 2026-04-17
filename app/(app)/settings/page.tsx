@@ -59,7 +59,7 @@ export default function SettingsPage() {
           const Icon = section.icon;
           return (
             <Link key={section.href} href={section.href} className="block cursor-pointer outline-none">
-              <Card className="h-full border-[#ebebeb] bg-white transition hover:border-[#ff6b1e]/40 hover:shadow-sm">
+              <Card className="h-full border-[#ebebeb] bg-white shadow-none transition hover:border-[#ff6b1e]/40 hover:shadow-none">
                 <CardHeader className="pb-2">
                   <div className="flex items-start gap-3">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#f9f4ef] text-[#ff6b1e]">

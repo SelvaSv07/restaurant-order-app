@@ -19,6 +19,7 @@
 
 # production
 /build
+/dist
 
 # uploaded product images (keep .gitkeep)
 /public/uploads/products/*

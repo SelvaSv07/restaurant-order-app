@@ -62,7 +62,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
         outCount={outCount}
       />
 
-      <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/[0.06]">
+      <div className="rounded-xl bg-white p-4 shadow-none ring-1 ring-black/[0.06]">
         <Suspense fallback={<div className="h-14 rounded-xl bg-white/60" />}>
           <InventoryToolbar />
         </Suspense>

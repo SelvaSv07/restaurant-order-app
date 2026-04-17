@@ -1,7 +1,10 @@
 {
   "name": "restaurant-order-app",
   "version": "0.1.0",
+  "description": "Restaurant order management — local desktop app (Next.js + Electron).",
   "private": true,
+  "main": "electron/main.cjs",
+  "homepage": "./",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,7 +12,13 @@
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:clear-bills": "node scripts/clear-bills.mjs"
+    "db:clear-bills": "node scripts/clear-bills.mjs",
+    "copy:standalone-assets": "node scripts/copy-standalone-assets.cjs",
+    "build:electron": "next build && node scripts/copy-standalone-assets.cjs",
+    "setup:embedded-node": "node scripts/download-embedded-node.mjs",
+    "clean:dist": "node scripts/clean-dist.cjs",
+    "electron:dev": "electron .",
+    "electron:dist": "npm run clean:dist && npm run build:electron && npm run setup:embedded-node && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.0",
@@ -41,10 +50,47 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^7.0.3",
     "drizzle-kit": "^0.31.10",
+    "electron": "^34.2.0",
+    "electron-builder": "^25.1.8",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "build": {
+    "appId": "com.restaurantorder.app",
+    "productName": "Restaurant Order",
+    "npmRebuild": false,
+    "forceCodeSigning": false,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": "standalone"
+      },
+      {
+        "from": "build/node-runtime",
+        "to": "node-runtime"
+      }
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "signDlls": false,
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }

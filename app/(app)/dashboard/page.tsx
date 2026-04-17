@@ -1,4 +1,5 @@
 import { IndianRupee, Package, Receipt } from "lucide-react";
+import Link from "next/link";
 
 import { CategoryDonutChart } from "@/components/app/category-donut-chart";
 import { DashboardHeader } from "@/components/app/dashboard-header";
@@ -94,7 +95,18 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           </div>
         </div>
 
-        <DashboardPanel title="Recent Orders" subtitle="Latest activity across the restaurant">
+        <DashboardPanel
+          title="Recent Orders"
+          subtitle="Today orders only · Asia/Kolkata"
+          action={
+            <Link
+              href="/bills"
+              className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-[#ff6b1e] px-4 text-sm font-semibold text-white transition hover:bg-[#f55f0f]"
+            >
+              See All Orders
+            </Link>
+          }
+        >
           <RecentOrdersTable rows={data.recentRows} />
         </DashboardPanel>
       </div>

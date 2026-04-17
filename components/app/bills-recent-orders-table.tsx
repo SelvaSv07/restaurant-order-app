@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import type { InferSelectModel } from "drizzle-orm";
-import { ArrowUpDown } from "lucide-react";
 
 import { BillDetailDialog } from "@/components/app/bill-detail-dialog";
 import { BillsRowActions } from "@/components/app/bills-row-actions";
@@ -40,43 +39,13 @@ export function BillsRecentOrdersTable({
       <Table>
         <TableHeader>
           <TableRow className="border-[#ebebeb] hover:bg-transparent">
-            <TableHead className="text-xs font-normal text-[#858585]">
-              <span className="inline-flex items-center gap-1">
-                Order ID
-                <ArrowUpDown className="size-3.5 opacity-60" />
-              </span>
-            </TableHead>
-            <TableHead className="text-xs font-normal text-[#858585]">
-              <span className="inline-flex items-center gap-1">
-                Date
-                <ArrowUpDown className="size-3.5 opacity-60" />
-              </span>
-            </TableHead>
-            <TableHead className="text-xs font-normal text-[#858585]">
-              <span className="inline-flex items-center gap-1">
-                Time
-                <ArrowUpDown className="size-3.5 opacity-60" />
-              </span>
-            </TableHead>
-            <TableHead className="text-center text-xs font-normal text-[#858585]">
-              <span className="inline-flex items-center justify-center gap-1">
-                Order type
-                <ArrowUpDown className="size-3.5 opacity-60" />
-              </span>
-            </TableHead>
+            <TableHead className="text-xs font-normal text-[#858585]">Order ID</TableHead>
+            <TableHead className="text-xs font-normal text-[#858585]">Date</TableHead>
+            <TableHead className="text-xs font-normal text-[#858585]">Time</TableHead>
+            <TableHead className="text-center text-xs font-normal text-[#858585]">Order type</TableHead>
             <TableHead className="text-right text-xs font-normal text-[#858585]">Qty</TableHead>
-            <TableHead className="text-right text-xs font-normal text-[#858585]">
-              <span className="inline-flex w-full items-center justify-end gap-1">
-                Amount
-                <ArrowUpDown className="size-3.5 opacity-60" />
-              </span>
-            </TableHead>
-            <TableHead className="text-center text-xs font-normal text-[#858585]">
-              <span className="inline-flex items-center justify-center gap-1">
-                Status
-                <ArrowUpDown className="size-3.5 opacity-60" />
-              </span>
-            </TableHead>
+            <TableHead className="text-right text-xs font-normal text-[#858585]">Amount</TableHead>
+            <TableHead className="text-center text-xs font-normal text-[#858585]">Status</TableHead>
             <TableHead className="w-10 p-2 text-right text-[#858585]">
               <span className="sr-only">Row menu</span>
             </TableHead>

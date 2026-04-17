@@ -49,9 +49,9 @@ export function AddProductDialog({
       <DialogTrigger
         type="button"
         disabled={!canAdd}
-        className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1 rounded-[10px] border-0 bg-[#ff6b1e] px-4 text-xs font-semibold text-white shadow-none outline-none hover:bg-[#ff6b1e]/90 disabled:pointer-events-none disabled:opacity-50"
+        className="inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border-0 bg-[#ff6b1e] px-4 text-xs font-semibold text-white shadow-none outline-none transition hover:bg-[#ea580c] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35 disabled:pointer-events-none disabled:opacity-50"
       >
-        <Plus className="size-3.5" strokeWidth={2} />
+        <Plus className="size-3.5 shrink-0" strokeWidth={2} aria-hidden />
         Add product
       </DialogTrigger>
       <DialogContent
@@ -135,7 +135,7 @@ export function AddProductDialog({
           <Button
             type="submit"
             disabled={!photoOk}
-            className="mt-1 h-10 w-full rounded-[10px] border-0 bg-[#ff6b1e] text-sm font-semibold text-white shadow-none hover:bg-[#ff6b1e]/90 disabled:opacity-50 sm:col-span-2"
+            className="mt-1 h-10 w-full border-0 bg-[#ff6b1e] text-sm font-semibold text-white shadow-none hover:bg-[#ea580c] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35 disabled:opacity-50 sm:col-span-2"
           >
             Save product
           </Button>

@@ -53,32 +53,40 @@ export function BillingOrderSidebar({ lines }: { lines: LineRow[] }) {
                 </button>
               </form>
             </div>
-            <div className="flex items-center gap-2">
-              <form action={adjustLineQtyAction}>
-                <input type="hidden" name="lineId" value={line.id} />
-                <input type="hidden" name="delta" value={-1} />
-                <button
-                  type="submit"
-                  className="flex cursor-pointer text-[#f97316] transition-opacity hover:opacity-80"
-                  aria-label="Decrease quantity"
-                >
-                  <CircleMinus className="size-[22px]" strokeWidth={1.5} />
-                </button>
-              </form>
-              <span className="flex h-7 min-w-[48px] items-center justify-center rounded-full border border-[#d6d6d6] bg-transparent px-3 text-sm font-semibold tabular-nums text-[#454545]">
-                {line.qty}
-              </span>
-              <form action={adjustLineQtyAction}>
-                <input type="hidden" name="lineId" value={line.id} />
-                <input type="hidden" name="delta" value={1} />
-                <button
-                  type="submit"
-                  className="flex cursor-pointer text-[#f97316] transition-opacity hover:opacity-80"
-                  aria-label="Increase quantity"
-                >
-                  <CirclePlus className="size-[22px]" strokeWidth={1.5} />
-                </button>
-              </form>
+            <div className="flex min-w-0 items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <form action={adjustLineQtyAction}>
+                  <input type="hidden" name="lineId" value={line.id} />
+                  <input type="hidden" name="delta" value={-1} />
+                  <button
+                    type="submit"
+                    className="flex cursor-pointer text-[#f97316] transition-opacity hover:opacity-80"
+                    aria-label="Decrease quantity"
+                  >
+                    <CircleMinus className="size-[22px]" strokeWidth={1.5} />
+                  </button>
+                </form>
+                <span className="flex h-7 min-w-[48px] items-center justify-center rounded-full border border-[#d6d6d6] bg-transparent px-3 text-sm font-semibold tabular-nums text-[#454545]">
+                  {line.qty}
+                </span>
+                <form action={adjustLineQtyAction}>
+                  <input type="hidden" name="lineId" value={line.id} />
+                  <input type="hidden" name="delta" value={1} />
+                  <button
+                    type="submit"
+                    className="flex cursor-pointer text-[#f97316] transition-opacity hover:opacity-80"
+                    aria-label="Increase quantity"
+                  >
+                    <CirclePlus className="size-[22px]" strokeWidth={1.5} />
+                  </button>
+                </form>
+              </div>
+              <p
+                className="shrink-0 text-sm font-semibold tabular-nums text-[#f97316]"
+                title="Line total"
+              >
+                {formatINR(line.lineTotalRupee)}
+              </p>
             </div>
           </div>
         </div>

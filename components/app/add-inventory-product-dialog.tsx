@@ -16,9 +16,9 @@ export function AddInventoryProductDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         type="button"
-        className="inline-flex h-9 shrink-0 items-center gap-1 rounded-[10px] border-0 bg-[#ff6b1e] px-4 text-xs font-semibold text-white shadow-none outline-none hover:bg-[#ff6b1e]/90"
+        className="inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border-0 bg-[#ff6b1e] px-4 text-xs font-semibold text-white shadow-none outline-none transition hover:bg-[#ea580c] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"
       >
-        <Plus className="size-3.5" />
+        <Plus className="size-3.5 shrink-0" aria-hidden />
         Add Product
       </DialogTrigger>
       <DialogContent className="max-w-md gap-6" showCloseButton>
@@ -62,7 +62,10 @@ export function AddInventoryProductDialog() {
             />
             <p className="text-xs text-[#858585]">Status shows Low when quantity is at or below this number.</p>
           </div>
-          <Button type="submit" className="mt-2 w-full bg-[#ff6b1e] hover:bg-[#ff6b1e]/90">
+          <Button
+            type="submit"
+            className="mt-2 w-full border-0 bg-[#ff6b1e] font-semibold shadow-none hover:bg-[#ea580c] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"
+          >
             Save product
           </Button>
         </form>

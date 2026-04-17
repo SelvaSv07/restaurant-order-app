@@ -85,9 +85,9 @@ export function EditCategoryDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         type="button"
-        className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-[10px] border border-[#ebebeb] bg-white px-3.5 text-xs font-semibold text-[#333] shadow-sm ring-0 transition hover:border-[#ff6b1e]/35 hover:bg-[#fffaf6]"
+        className="inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-[#ebebeb] bg-white px-3 text-xs font-semibold text-[#333] shadow-none transition hover:bg-[#f7f7f7] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"
       >
-        <Pencil className="size-3.5 text-[#858585]" strokeWidth={2} />
+        <Pencil className="size-3.5 shrink-0 text-[#858585]" strokeWidth={2} aria-hidden />
         Edit
       </DialogTrigger>
       <DialogContent
@@ -154,7 +154,7 @@ export function EditCategoryDialog({
           </div>
           <Button
             type="submit"
-            className="mt-1 h-10 w-full rounded-[10px] border-0 bg-[#ff6b1e] text-sm font-semibold text-white shadow-none hover:bg-[#ff6b1e]/90"
+            className="mt-1 h-10 w-full border-0 bg-[#ff6b1e] text-sm font-semibold text-white shadow-none hover:bg-[#ea580c] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"
           >
             Save changes
           </Button>

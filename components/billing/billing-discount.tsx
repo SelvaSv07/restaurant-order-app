@@ -54,7 +54,7 @@ export function BillingDiscountControl({ billId, discountType, discountValue }: 
   };
 
   return (
-    <div className="mt-4 border-t border-[#d6d6d6] pt-4">
+    <div className="mt-3 border-t border-[#d6d6d6] pt-3">
       {!showForm && !active ? (
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-sm font-semibold text-[#454545]">Discount</h3>

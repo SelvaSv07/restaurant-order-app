@@ -23,7 +23,7 @@ export function InventoryStockLevelCard({
   const bars = splitStockBars(inCount, lowCount, outCount);
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-5 rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/[0.06]">
+    <div className="flex w-full min-w-0 flex-col gap-5 rounded-xl bg-white p-4 shadow-none ring-1 ring-black/[0.06]">
       <h2 className="text-base font-semibold text-[#333]">Stock Level</h2>
 
       <div className="flex flex-col gap-4">

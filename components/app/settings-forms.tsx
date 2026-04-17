@@ -56,7 +56,11 @@ export function BusinessForm({
       <Input className="cursor-text" placeholder="Phone" {...form.register("phone")} />
       <Input className="cursor-text" placeholder="GST number" {...form.register("gstNumber")} />
       <Input className="cursor-text md:col-span-2" placeholder="Address" {...form.register("address")} />
-      <Button type="submit" disabled={saving} className="md:w-fit">
+      <Button
+        type="submit"
+        disabled={saving}
+        className="border-0 bg-[#ff6b1e] font-semibold shadow-none hover:bg-[#ea580c] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35 md:w-fit"
+      >
         Save business details
       </Button>
     </form>
@@ -98,7 +102,7 @@ export function PrinterForm({
             >
               <SelectTrigger
                 className={cn(
-                  "h-10 w-full cursor-pointer rounded-xl border-0 bg-[#f7f7f7] shadow-none ring-1 ring-[#ebebeb]",
+                  "h-10 w-full cursor-pointer rounded-lg border-0 bg-[#f7f7f7] shadow-none ring-1 ring-[#ebebeb]",
                   "justify-between px-3 text-left text-sm text-[#333] hover:bg-[#f0f0f0] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35",
                 )}
                 size="default"
@@ -113,7 +117,11 @@ export function PrinterForm({
           )}
         />
       </div>
-      <Button type="submit" disabled={saving} className="md:w-fit">
+      <Button
+        type="submit"
+        disabled={saving}
+        className="border-0 bg-[#ff6b1e] font-semibold shadow-none hover:bg-[#ea580c] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35 md:w-fit"
+      >
         Save printer settings
       </Button>
     </form>

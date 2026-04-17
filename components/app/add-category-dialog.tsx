@@ -48,9 +48,9 @@ export function AddCategoryDialog({ takenColorHexes }: { takenColorHexes: string
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         type="button"
-        className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1 rounded-[10px] border-0 bg-[#ff6b1e] px-4 text-xs font-semibold text-white shadow-none outline-none hover:bg-[#ff6b1e]/90"
+        className="inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border-0 bg-[#ff6b1e] px-4 text-xs font-semibold text-white shadow-none outline-none transition hover:bg-[#ea580c] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"
       >
-        <Plus className="size-3.5" strokeWidth={2} />
+        <Plus className="size-3.5 shrink-0" strokeWidth={2} aria-hidden />
         Add category
       </DialogTrigger>
       <DialogContent
@@ -111,7 +111,7 @@ export function AddCategoryDialog({ takenColorHexes }: { takenColorHexes: string
           <Button
             type="submit"
             disabled={noFreeColor}
-            className="mt-1 h-10 w-full rounded-[10px] border-0 bg-[#ff6b1e] text-sm font-semibold text-white shadow-none hover:bg-[#ff6b1e]/90 disabled:opacity-50"
+            className="mt-1 h-10 w-full border-0 bg-[#ff6b1e] text-sm font-semibold text-white shadow-none hover:bg-[#ea580c] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35 disabled:opacity-50"
           >
             Save category
           </Button>

@@ -1,14 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ClipboardList,
-  ChevronDown,
-  CookingPot,
-  LayoutGrid,
-  Package2,
-  ReceiptText,
-} from "lucide-react";
+import { ClipboardList, CookingPot, LayoutGrid, Package2, ReceiptText } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -23,7 +16,7 @@ const links: {
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { href: "/billing", label: "Billing", icon: ReceiptText },
   { href: "/dine-in", label: "Dine-in", icon: CookingPot },
-  { href: "/inventory", label: "Inventory", icon: Package2, suffix: ChevronDown },
+  { href: "/inventory", label: "Inventory", icon: Package2 },
   { href: "/bills", label: "Bills", icon: ClipboardList },
 ];
 

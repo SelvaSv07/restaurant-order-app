@@ -112,7 +112,7 @@ export function ProductPhotoFileField({
         type="file"
         accept="image/jpeg,image/png,image/webp,image/gif"
         onChange={onFileChange}
-        className="cursor-pointer text-xs text-[#333] file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-[#ff6b1e] file:px-3.5 file:py-2 file:text-xs file:font-semibold file:text-white file:shadow-none hover:file:bg-[#ff6b1e]/90"
+        className="cursor-pointer text-xs text-[#333] file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-[#ff6b1e] file:px-3.5 file:py-2 file:text-xs file:font-semibold file:text-white file:shadow-none hover:file:bg-[#ea580c]"
       />
       {error ? <p className="text-xs font-medium text-red-600">{error}</p> : null}
     </div>

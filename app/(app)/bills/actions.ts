@@ -7,17 +7,13 @@ import { db } from "@/lib/db";
 import { bills, diningTables } from "@/lib/db/schema";
 import { getBillWithLines } from "@/lib/repository";
 
-/** Draft bills are removed; completed bills are voided (canceled). */
+/** Never delete bills — always mark as voided (canceled). */
 export async function deleteOrVoidBillAction(billId: number): Promise<{ ok: true } | { ok: false; error: string }> {
   const [bill] = await db.select().from(bills).where(eq(bills.id, billId));
   if (!bill) return { ok: false, error: "not_found" };
   if (bill.status === "voided") return { ok: false, error: "already_void" };
 
-  if (bill.status === "draft") {
-    await db.delete(bills).where(eq(bills.id, billId));
-  } else {
-    await db.update(bills).set({ status: "voided" }).where(eq(bills.id, billId));
-  }
+  await db.update(bills).set({ status: "voided" }).where(eq(bills.id, billId));
 
   revalidatePath("/bills");
   revalidatePath("/dashboard");

@@ -13,8 +13,11 @@ import {
 import type { ChartBucket } from "@/lib/chart-series";
 import { mergeRevenueChart, TODAY_CHART_HOUR_WINDOW } from "@/lib/chart-series";
 import type { PeriodPreset } from "@/lib/ist";
-import { resolvePreviousComparisonRange } from "@/lib/ist";
+import { resolvePreviousComparisonRange, resolvePresetRange } from "@/lib/ist";
 import { percentageDiscount } from "@/lib/money";
+
+/** Exclude empty carts: no lines or total line qty is 0. */
+const billHasPositiveLineQty = sql`(select coalesce(sum(${billLines.qty}), 0) from ${billLines} where ${billLines.billId} = ${bills.id}) > 0`;
 
 export async function ensureDefaults() {
   const business = await db.select().from(businessSettings).where(eq(businessSettings.id, 1));
@@ -64,8 +67,20 @@ export async function getCategoryRevenueByRange(from: Date, to: Date) {
     .orderBy(desc(sql`sum(${billLines.lineTotalRupee})`));
 }
 
-export async function getRecentBillsForDashboard(limit: number) {
-  const list = await db.select().from(bills).orderBy(desc(bills.createdAt)).limit(limit);
+/** Recent bills for the dashboard: latest within the given range (use IST today for “today only”). */
+export async function getRecentBillsForDashboard(limit: number, from: Date, to: Date) {
+  const list = await db
+    .select()
+    .from(bills)
+    .where(
+      and(
+        inArray(bills.status, ["draft", "completed"]),
+        gte(bills.createdAt, from),
+        lte(bills.createdAt, to),
+      ),
+    )
+    .orderBy(desc(bills.createdAt))
+    .limit(limit);
   if (list.length === 0) return [];
   const ids = list.map((b) => b.id);
   const lines = await db.select().from(billLines).where(inArray(billLines.billId, ids));
@@ -308,7 +323,7 @@ export async function getBillStatusCounts(from: Date, to: Date) {
       count: sql<number>`count(*)`,
     })
     .from(bills)
-    .where(and(gte(bills.createdAt, from), lte(bills.createdAt, to)))
+    .where(and(gte(bills.createdAt, from), lte(bills.createdAt, to), billHasPositiveLineQty))
     .groupBy(bills.status);
 
   let draft = 0;
@@ -320,11 +335,16 @@ export async function getBillStatusCounts(from: Date, to: Date) {
     else if (r.status === "completed") completed = n;
     else if (r.status === "voided") voided = n;
   }
-  return { total: draft + completed + voided, draft, completed, voided };
+  /** Total orders for analytics: draft + completed only (canceled excluded). */
+  return { total: draft + completed, draft, completed, voided };
 }
 
 export async function getBillCountByDay(from: Date, to: Date, chartBucket: ChartBucket = "day") {
-  const rangeWhere = and(gte(bills.createdAt, from), lte(bills.createdAt, to));
+  const rangeWhere = and(
+    gte(bills.createdAt, from),
+    lte(bills.createdAt, to),
+    inArray(bills.status, ["draft", "completed"]),
+  );
   if (chartBucket === "hour") {
     return db
       .select({
@@ -420,7 +440,14 @@ export async function getOrderTypeCounts(from: Date, to: Date) {
       count: sql<number>`count(*)`,
     })
     .from(bills)
-    .where(and(gte(bills.createdAt, from), lte(bills.createdAt, to)))
+    .where(
+      and(
+        gte(bills.createdAt, from),
+        lte(bills.createdAt, to),
+        inArray(bills.status, ["draft", "completed"]),
+        billHasPositiveLineQty,
+      ),
+    )
     .groupBy(bills.orderType);
 
   let dineIn = 0;
@@ -446,7 +473,7 @@ export type BillsListParams = {
 
 export async function getBillsListPage(params: BillsListParams) {
   const { from, to, status, q, page, pageSize } = params;
-  const conditions = [gte(bills.createdAt, from), lte(bills.createdAt, to)];
+  const conditions = [gte(bills.createdAt, from), lte(bills.createdAt, to), billHasPositiveLineQty];
   if (status !== "all") {
     conditions.push(eq(bills.status, status));
   }
@@ -502,6 +529,7 @@ export async function getDashboardPageData(
   const { prevFrom, prevTo } = resolvePreviousComparisonRange(period, from, to);
   const todayHourWindow =
     period === "today" && chartBucket === "hour" ? TODAY_CHART_HOUR_WINDOW : undefined;
+  const todayIst = resolvePresetRange("today");
 
   const [current, previous, itemsSold, prevItemsSold, categories, orderTypes, recentRows] =
     await Promise.all([
@@ -511,7 +539,7 @@ export async function getDashboardPageData(
       getItemsSoldInRange(prevFrom, prevTo),
       getCategoryRevenueByRange(from, to),
       getOrderTypeCounts(from, to),
-      getRecentBillsForDashboard(5),
+      getRecentBillsForDashboard(20, todayIst.from, todayIst.to),
     ]);
 
   return {

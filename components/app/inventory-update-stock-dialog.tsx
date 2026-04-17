@@ -46,7 +46,7 @@ export function InventoryUpdateStockDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         type="button"
-        className="inline-flex items-center justify-center rounded-lg bg-[#ffeee0] px-3 py-1.5 text-xs font-medium text-[#333] outline-none hover:bg-[#ffeee0]/80"
+        className="inline-flex h-8 cursor-pointer items-center justify-center rounded-lg border border-[#ff6b1e]/30 bg-[#fff7ed] px-3 text-xs font-semibold text-[#c2410c] shadow-none outline-none transition hover:bg-[#ffedd5] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"
       >
         Update
       </DialogTrigger>
@@ -64,7 +64,7 @@ export function InventoryUpdateStockDialog({
             <Button
               type="button"
               variant="outline"
-              className="size-12 shrink-0 rounded-xl border-[#ebebeb] bg-white p-0 shadow-none hover:bg-[#fafafa] disabled:opacity-40"
+              className="size-12 shrink-0 rounded-lg border-[#ebebeb] bg-white p-0 shadow-none hover:bg-[#f7f7f7] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35 disabled:opacity-40"
               disabled={pending || value <= 0}
               aria-label="Decrease quantity"
               onClick={() => setValue((v) => Math.max(0, v - 1))}
@@ -77,7 +77,7 @@ export function InventoryUpdateStockDialog({
             <Button
               type="button"
               variant="outline"
-              className="size-12 shrink-0 rounded-xl border-[#ebebeb] bg-white p-0 shadow-none hover:bg-[#fafafa]"
+              className="size-12 shrink-0 rounded-lg border-[#ebebeb] bg-white p-0 shadow-none hover:bg-[#f7f7f7] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"
               disabled={pending}
               aria-label="Increase quantity"
               onClick={() => setValue((v) => v + 1)}
@@ -87,7 +87,7 @@ export function InventoryUpdateStockDialog({
           </div>
           <Button
             type="button"
-            className="w-full bg-[#ff6b1e] hover:bg-[#ff6b1e]/90"
+            className="w-full border-0 bg-[#ff6b1e] font-semibold shadow-none hover:bg-[#ea580c] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"
             disabled={pending}
             onClick={() => save()}
           >

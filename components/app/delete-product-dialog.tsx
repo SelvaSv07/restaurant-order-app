@@ -1,5 +1,6 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { deleteProductAction } from "@/app/(app)/settings/actions";
@@ -26,8 +27,9 @@ export function DeleteProductDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         type="button"
-        className="inline-flex h-9 shrink-0 cursor-pointer items-center rounded-[10px] border border-red-200/80 bg-red-50/90 px-3.5 text-xs font-semibold text-red-700 shadow-sm transition hover:bg-red-100"
+        className="inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-red-200/80 bg-red-50 px-3 text-xs font-semibold text-red-700 shadow-none transition hover:bg-red-100 focus-visible:ring-2 focus-visible:ring-red-400/35"
       >
+        <Trash2 className="size-3.5 shrink-0" strokeWidth={2} aria-hidden />
         Delete
       </DialogTrigger>
       <DialogContent
@@ -47,7 +49,7 @@ export function DeleteProductDialog({
           <Button
             type="button"
             variant="outline"
-            className="h-9 rounded-[10px] border-[#ebebeb] bg-white font-semibold text-[#333] hover:bg-[#f7f7f7]"
+            className="h-8 rounded-lg border-[#ebebeb] bg-white font-semibold text-[#333] shadow-none hover:bg-[#f7f7f7] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"
             onClick={() => setOpen(false)}
           >
             Cancel
@@ -63,7 +65,7 @@ export function DeleteProductDialog({
             <Button
               type="submit"
               variant="destructive"
-              className="h-9 w-full rounded-[10px] border-0 bg-red-600 font-semibold text-white hover:bg-red-700 sm:w-auto"
+              className="h-8 w-full rounded-lg border-0 bg-red-600 font-semibold text-white shadow-none hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-red-400/40 sm:w-auto"
             >
               Delete product
             </Button>

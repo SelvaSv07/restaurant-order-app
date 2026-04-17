@@ -19,7 +19,7 @@ export default async function SettingsTablesPage() {
         </p>
       </div>
 
-      <div className="rounded-xl border border-[#ebebeb] bg-white p-4 shadow-sm">
+      <div className="rounded-xl border border-[#ebebeb] bg-white p-4 shadow-none">
         <p className="text-sm font-semibold text-[#333]">Add table</p>
         <form action={addTableAction} className="mt-3 flex flex-wrap items-end gap-2">
           <div className="min-w-[200px] flex-1">
@@ -34,7 +34,10 @@ export default async function SettingsTablesPage() {
               className="border-[#ebebeb]"
             />
           </div>
-          <Button type="submit" className="bg-[#ff6b1e] hover:bg-[#ea580c]">
+          <Button
+            type="submit"
+            className="border-0 bg-[#ff6b1e] font-semibold shadow-none hover:bg-[#ea580c] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"
+          >
             Add table
           </Button>
         </form>

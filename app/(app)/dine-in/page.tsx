@@ -1,16 +1,13 @@
 import Link from "next/link";
-import { CirclePlus, Plus, Search } from "lucide-react";
-
-import { addDineInLineAction, adjustDineInLineQtyAction } from "@/app/(app)/dine-in/actions";
-import { DineInDecreaseWithConfirm, DineInRemoveLineWithConfirm } from "@/components/app/dine-in-adjust-with-confirm";
-import { ProductImage } from "@/components/billing/product-image";
+import { Suspense } from "react";
+import { ProductMenuCard } from "@/components/billing/product-menu-card";
 import { CategoryLucideIcon } from "@/components/category-lucide-icon";
 import { DineInCheckoutFlow, DineInPaymentDetailsCard } from "@/components/app/dine-in-checkout-flow";
 import { DineInOrderSidebar } from "@/components/app/dine-in-order-sidebar";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DineInProductSearch } from "@/components/app/dine-in-product-search";
 import { DineInOrderScrollArea } from "@/components/app/dine-in-order-scroll-area";
-import { formatINR } from "@/lib/money";
 import { getBillWithLines, getCategoriesWithProducts, getOpenTableBill, getTables } from "@/lib/repository";
 import { cn } from "@/lib/utils";
 
@@ -102,19 +99,13 @@ export default async function DineInPage({ searchParams }: PageProps) {
             </div>
 
             <div className="flex min-w-0 flex-col gap-5">
-              <form action="/dine-in" method="get" className="w-full">
-                <input type="hidden" name="tableId" value={selectedTableId} />
-                {rawCat && rawCat !== "all" ? <input type="hidden" name="category" value={rawCat} /> : null}
-                <label className="flex w-full min-w-0 items-center gap-2 rounded-full border border-[#d6d6d6] bg-white px-4 py-2.5 shadow-sm">
-                  <Search className="size-4 shrink-0 text-[#7a7a7a]" />
-                  <input
-                    name="q"
-                    defaultValue={sp.q ?? ""}
-                    placeholder="Search products…"
-                    className="min-w-0 flex-1 bg-transparent text-sm font-medium text-[#454545] outline-none placeholder:text-[#b0b0b0]"
-                  />
-                </label>
-              </form>
+              <Suspense
+                fallback={
+                  <div className="h-[46px] w-full animate-pulse rounded-full bg-[#f0f0f0]" aria-hidden />
+                }
+              >
+                <DineInProductSearch tableId={selectedTableId} categoryRaw={rawCat} />
+              </Suspense>
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <CategoryPill
                   href={dineInHref({ tableId: selectedTableId, category: "all", q: sp.q })}
@@ -147,72 +138,20 @@ export default async function DineInPage({ searchParams }: PageProps) {
               const iconKey = cat?.iconKey ?? "Utensils";
               const iconColor = cat?.colorHex ?? "#f97316";
 
+              const showQtyControls = Boolean(line && newQty > 0);
+
               return (
-                <div
+                <ProductMenuCard
                   key={product.id}
-                  className="flex h-[242px] w-[249px] max-w-full flex-col overflow-hidden rounded-[15px] bg-white shadow-sm ring-1 ring-black/[0.04]"
-                >
-                  <div className="relative h-[144px] w-full shrink-0 overflow-hidden rounded-t-[15px] bg-[#d9d9d9]">
-                    <ProductImage
-                      src={product.imageLocalPath ?? null}
-                      alt={product.name}
-                      iconKey={iconKey}
-                      iconColor={iconColor}
-                      className="h-full w-full"
-                    />
-                  </div>
-                  <div className="flex min-h-0 flex-1 flex-col px-4 pb-3 pt-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="line-clamp-2 min-w-0 text-[16px] font-semibold leading-tight text-[#454545]">
-                        {product.name}
-                      </p>
-                      <p className="shrink-0 text-[16px] font-semibold leading-tight text-[#f97316]">
-                        {formatINR(product.priceRupee)}
-                      </p>
-                    </div>
-                    {line && newQty > 0 ? (
-                      <div className="mt-auto flex items-center justify-between gap-1.5 pt-2">
-                        <div className="flex items-center gap-1.5">
-                          <DineInDecreaseWithConfirm lineId={line.id} qtyKotSent={line.qtyKotSent} />
-                          <span className="flex h-7 min-w-[48px] items-center justify-center rounded-full border border-[#d6d6d6] bg-transparent px-2 text-sm font-semibold text-[#454545]">
-                            {newQty}
-                          </span>
-                          <form action={adjustDineInLineQtyAction}>
-                            <input type="hidden" name="lineId" value={line.id} />
-                            <input type="hidden" name="delta" value={1} />
-                            <button
-                              type="submit"
-                              className="flex cursor-pointer text-[#f97316] transition-opacity hover:opacity-80"
-                              aria-label="Increase quantity"
-                            >
-                              <CirclePlus className="size-6" strokeWidth={1.5} />
-                            </button>
-                          </form>
-                        </div>
-                        <DineInRemoveLineWithConfirm
-                          lineId={line.id}
-                          qtyKotSent={line.qtyKotSent}
-                          className="cursor-pointer rounded-full p-1 text-[#ef4444] transition-colors hover:bg-red-50 hover:text-red-600"
-                          trashIconClassName="size-5"
-                          aria-label="Remove from cart"
-                        />
-                      </div>
-                    ) : (
-                      <form action={addDineInLineAction} className="mt-auto w-full pt-2">
-                        <input type="hidden" name="billId" value={bill.id} />
-                        <input type="hidden" name="productId" value={product.id} />
-                        <input type="hidden" name="qty" value={1} />
-                        <Button
-                          type="submit"
-                          className="mx-auto flex h-auto w-[217px] max-w-full items-center justify-center gap-1.5 rounded-full border-0 bg-[#f97316] px-4 py-1 text-[12px] font-semibold text-white hover:bg-[#ea580c]"
-                        >
-                          <Plus className="size-3.5" aria-hidden />
-                          Add
-                        </Button>
-                      </form>
-                    )}
-                  </div>
-                </div>
+                  mode="dine-in"
+                  product={product}
+                  categoryIconKey={iconKey}
+                  categoryColorHex={iconColor}
+                  billId={bill.id}
+                  line={line}
+                  newQty={newQty}
+                  showQtyControls={showQtyControls}
+                />
               );
             })}
           </div>

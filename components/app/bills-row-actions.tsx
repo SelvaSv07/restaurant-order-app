@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { EllipsisVertical, Trash2 } from "lucide-react";
+import { Ban, EllipsisVertical } from "lucide-react";
 import { toast } from "sonner";
 
 import { deleteOrVoidBillAction } from "@/app/(app)/bills/actions";
@@ -31,22 +31,22 @@ export function BillsRowActions({
 }) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [reprintOpen, setReprintOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const showReprint = status !== "draft" && status !== "voided";
-  const showDelete = status !== "voided";
+  const showCancel = status !== "voided";
 
-  const runDelete = () => {
+  const runCancel = () => {
     startTransition(async () => {
       const result = await deleteOrVoidBillAction(billId);
-      setDeleteOpen(false);
+      setCancelOpen(false);
       setPopoverOpen(false);
       if (!result.ok) {
         toast.error(result.error === "already_void" ? "Order is already canceled." : "Could not update order.");
         return;
       }
-      toast.success(status === "draft" ? "Order removed." : "Order canceled.");
+      toast.success("Order canceled.");
     });
   };
 
@@ -94,7 +94,7 @@ export function BillsRowActions({
                 Reprint
               </button>
             ) : null}
-            {showDelete ? (
+            {showCancel ? (
               <button
                 type="button"
                 className={cn(
@@ -103,11 +103,11 @@ export function BillsRowActions({
                 )}
                 onClick={() => {
                   setPopoverOpen(false);
-                  setDeleteOpen(true);
+                  setCancelOpen(true);
                 }}
               >
-                <Trash2 className="size-4 shrink-0" strokeWidth={2} aria-hidden />
-                {status === "draft" ? "Delete" : "Cancel order"}
+                <Ban className="size-4 shrink-0" strokeWidth={2} aria-hidden />
+                Cancel
               </button>
             ) : null}
           </div>
@@ -137,10 +137,10 @@ export function BillsRowActions({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
         <DialogContent showCloseButton={false} className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>{status === "draft" ? "Delete this order?" : "Cancel this order?"}</DialogTitle>
+            <DialogTitle>Cancel this order?</DialogTitle>
             <DialogDescription>
               {status === "draft"
                 ? "This removes the draft bill and its lines. This cannot be undone."
@@ -153,7 +153,7 @@ export function BillsRowActions({
               variant="outline"
               className="rounded-lg"
               disabled={pending}
-              onClick={() => setDeleteOpen(false)}
+              onClick={() => setCancelOpen(false)}
             >
               Back
             </Button>
@@ -162,9 +162,9 @@ export function BillsRowActions({
               variant="destructive"
               className="rounded-lg"
               disabled={pending}
-              onClick={() => runDelete()}
+              onClick={() => runCancel()}
             >
-              {pending ? "Working…" : status === "draft" ? "Delete" : "Cancel order"}
+              {pending ? "Working…" : "Cancel order"}
             </Button>
           </div>
         </DialogContent>

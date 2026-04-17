@@ -119,5 +119,9 @@ export const printerSettings = sqliteTable("printer_settings", {
   paperWidth: text("paper_width", { enum: ["58mm", "80mm"] })
     .notNull()
     .default("80mm"),
+  /** Windows printer name for receipt/bill; empty = OS default in Electron silent print */
+  receiptPrinterName: text("receipt_printer_name").notNull().default(""),
+  /** Kitchen (KOT) printer name; empty = OS default */
+  kotPrinterName: text("kot_printer_name").notNull().default(""),
 });
 

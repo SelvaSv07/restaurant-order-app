@@ -1,13 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
-import { ArrowUpDown } from "lucide-react";
 
 import { BillDetailDialog } from "@/components/app/bill-detail-dialog";
 import { BillsRowActions } from "@/components/app/bills-row-actions";
 import { formatIstParts, OrderTypeBadge, StatusBadge } from "@/components/app/bills-order-display";
-import { Input } from "@/components/ui/input";
 import { formatINR, shouldHideDraftZeroAmount, shouldHideDraftZeroQty } from "@/lib/money";
 import {
   Table,
@@ -44,64 +41,17 @@ export function RecentOrdersTable({ rows }: { rows: Row[] }) {
 
   return (
     <>
-      <div className="space-y-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <label className="relative w-full max-w-[237px]">
-            <Input
-              readOnly
-              placeholder="Search order"
-              className="h-9 rounded-[10px] border-0 bg-[#f7f7f7] pl-3 text-xs text-[#858585] ring-0 placeholder:text-[#858585]"
-            />
-          </label>
-          <Link
-            href="/bills"
-            className="inline-flex h-10 w-full shrink-0 items-center justify-center rounded-xl bg-[#ff6b1e] px-4 text-sm font-semibold text-white transition hover:bg-[#f55f0f] sm:w-auto"
-          >
-            See All Orders
-          </Link>
-        </div>
-
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
               <TableRow className="border-[#ebebeb] hover:bg-transparent">
-                <TableHead className="text-xs font-normal text-[#858585]">
-                  <span className="inline-flex items-center gap-1">
-                    Order ID
-                    <ArrowUpDown className="size-3.5 opacity-60" />
-                  </span>
-                </TableHead>
-                <TableHead className="text-xs font-normal text-[#858585]">
-                  <span className="inline-flex items-center gap-1">
-                    Date
-                    <ArrowUpDown className="size-3.5 opacity-60" />
-                  </span>
-                </TableHead>
-                <TableHead className="text-xs font-normal text-[#858585]">
-                  <span className="inline-flex items-center gap-1">
-                    Time
-                    <ArrowUpDown className="size-3.5 opacity-60" />
-                  </span>
-                </TableHead>
-                <TableHead className="text-center text-xs font-normal text-[#858585]">
-                  <span className="inline-flex items-center justify-center gap-1">
-                    Order type
-                    <ArrowUpDown className="size-3.5 opacity-60" />
-                  </span>
-                </TableHead>
+                <TableHead className="text-xs font-normal text-[#858585]">Order ID</TableHead>
+                <TableHead className="text-xs font-normal text-[#858585]">Date</TableHead>
+                <TableHead className="text-xs font-normal text-[#858585]">Time</TableHead>
+                <TableHead className="text-center text-xs font-normal text-[#858585]">Order type</TableHead>
                 <TableHead className="text-right text-xs font-normal text-[#858585]">Qty</TableHead>
-                <TableHead className="text-right text-xs font-normal text-[#858585]">
-                  <span className="inline-flex w-full items-center justify-end gap-1">
-                    Amount
-                    <ArrowUpDown className="size-3.5 opacity-60" />
-                  </span>
-                </TableHead>
-                <TableHead className="text-center text-xs font-normal text-[#858585]">
-                  <span className="inline-flex items-center justify-center gap-1">
-                    Status
-                    <ArrowUpDown className="size-3.5 opacity-60" />
-                  </span>
-                </TableHead>
+                <TableHead className="text-right text-xs font-normal text-[#858585]">Amount</TableHead>
+                <TableHead className="text-center text-xs font-normal text-[#858585]">Status</TableHead>
                 <TableHead className="w-10 p-2 text-right text-[#858585]">
                   <span className="sr-only">Row menu</span>
                 </TableHead>
@@ -111,7 +61,7 @@ export function RecentOrdersTable({ rows }: { rows: Row[] }) {
               {rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="py-12 text-center text-sm text-[#858585]">
-                    No orders yet.
+                    No orders today.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -164,7 +114,6 @@ export function RecentOrdersTable({ rows }: { rows: Row[] }) {
             </TableBody>
           </Table>
         </div>
-      </div>
 
       <BillDetailDialog
         billId={detailBillId}
