@@ -18,6 +18,7 @@ const SETTINGS_PATHS = [
   "/settings/products",
   "/settings/business",
   "/settings/other",
+  "/settings/printer",
   "/settings/tables",
 ] as const;
 

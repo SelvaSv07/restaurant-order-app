@@ -4,6 +4,7 @@ import { createContext, useContext, useState } from "react";
 import { toast } from "sonner";
 
 import { markDineInKotPrintedAction } from "@/app/(app)/dine-in/actions";
+import { printKotToConfiguredDevice } from "@/lib/print-client";
 import { BillingDiscountControl } from "@/components/billing/billing-discount";
 import { CompleteBillForm } from "@/components/billing/complete-bill-form";
 import { Button } from "@/components/ui/button";
@@ -112,6 +113,8 @@ export function DineInCheckoutFlow({
     if (!hasUnsentLines || pending) return;
     setPending("update");
     try {
+      const printed = await printKotToConfiguredDevice(billId);
+      if (!printed) return;
       const result = await markDineInKotPrintedAction(billId);
       if (!result.ok) return;
       if (result.rows.length > 0) {
@@ -128,6 +131,8 @@ export function DineInCheckoutFlow({
     if (hasUnsentLines) {
       setPending("settle");
       try {
+        const printed = await printKotToConfiguredDevice(billId);
+        if (!printed) return;
         const result = await markDineInKotPrintedAction(billId);
         if (!result.ok) return;
         if (result.rows.length > 0) {

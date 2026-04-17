@@ -18,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { printReceiptToConfiguredDevice } from "@/lib/print-client";
 import { cn } from "@/lib/utils";
 
 type Status = "draft" | "completed" | "voided";
@@ -51,9 +52,11 @@ export function BillsRowActions({
   };
 
   const runReprint = () => {
-    window.open(`/print/${billId}`, "_blank", "noopener,noreferrer");
-    setReprintOpen(false);
-    setPopoverOpen(false);
+    void (async () => {
+      await printReceiptToConfiguredDevice(billId);
+      setReprintOpen(false);
+      setPopoverOpen(false);
+    })();
   };
 
   if (status === "voided") {
@@ -119,7 +122,8 @@ export function BillsRowActions({
           <DialogHeader>
             <DialogTitle>Reprint bill?</DialogTitle>
             <DialogDescription>
-              A printable bill will open in a new tab. Use your browser’s print dialog to send it to a printer.
+              In the desktop app, the receipt prints to the printer chosen under Settings → Printer. In a browser, a
+              tab opens for you to print manually.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

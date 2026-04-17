@@ -21,6 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatINR } from "@/lib/money";
+import { printReceiptToConfiguredDevice } from "@/lib/print-client";
 function toDate(d: Date | string): Date {
   return d instanceof Date ? d : new Date(d);
 }
@@ -97,7 +98,7 @@ export function BillDetailDialog({
 
   const runReprint = () => {
     if (billId == null) return;
-    window.open(`/print/${billId}`, "_blank", "noopener,noreferrer");
+    void printReceiptToConfiguredDevice(billId);
   };
 
   return (

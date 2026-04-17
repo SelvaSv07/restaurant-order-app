@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 
+import { KotPrintReadyBridge } from "@/components/print/kot-print-ready-bridge";
 import { db } from "@/lib/db";
 import { billLines, bills } from "@/lib/db/schema";
 
@@ -15,6 +16,7 @@ export default async function PrintKotPage({ params }: { params: Promise<{ billI
     const kotLines = lines.filter((line) => line.includeInKotSnapshot);
     return (
       <main className="mx-auto max-w-sm p-4">
+        <KotPrintReadyBridge billId={id} />
         <h1 className="text-center text-lg font-semibold">KOT</h1>
         <p className="text-center text-sm">Bill #{bill.billNumber}</p>
         <div className="mt-3 space-y-1 text-sm">
@@ -39,6 +41,7 @@ export default async function PrintKotPage({ params }: { params: Promise<{ billI
 
   return (
     <main className="mx-auto max-w-sm p-4">
+      <KotPrintReadyBridge billId={id} />
       <h1 className="text-center text-lg font-semibold">KOT</h1>
       <p className="text-center text-sm">Bill #{bill.billNumber}</p>
       <p className="mt-2 text-center text-xs text-muted-foreground">

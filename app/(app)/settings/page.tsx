@@ -35,9 +35,9 @@ const sections = [
     icon: Building2,
   },
   {
-    href: "/settings/other",
-    title: "Other settings",
-    description: "Receipt printer header, footer, and paper width.",
+    href: "/settings/printer",
+    title: "Printer",
+    description: "Receipt & KOT printers, header, footer, and paper width.",
     icon: Printer,
   },
 ] as const;

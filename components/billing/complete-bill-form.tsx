@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { completeBillAction } from "@/app/(app)/billing/order-actions";
 import { Button } from "@/components/ui/button";
+import { printReceiptToConfiguredDevice } from "@/lib/print-client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function CompleteBillForm({ billId, disabled }: { billId: number; disabled: boolean }) {
@@ -16,7 +17,12 @@ export function CompleteBillForm({ billId, disabled }: { billId: number; disable
       action={async (formData) => {
         try {
           const result = await completeBillAction(formData);
-          if (result.ok) toast.success("Bill created");
+          if (!result.ok) {
+            toast.error("Could not complete order");
+            return;
+          }
+          toast.success("Bill completed");
+          await printReceiptToConfiguredDevice(billId);
         } catch {
           toast.error("Could not complete order");
         }

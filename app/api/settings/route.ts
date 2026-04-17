@@ -33,6 +33,8 @@ const payloadSchema = z.discriminatedUnion("type", [
     headerText: z.string().min(1),
     footerText: z.string().min(1),
     paperWidth: z.enum(["58mm", "80mm"]),
+    receiptPrinterName: z.string(),
+    kotPrinterName: z.string(),
   }),
 ]);
 
@@ -84,6 +86,8 @@ export async function POST(request: Request) {
         headerText: payload.headerText,
         footerText: payload.footerText,
         paperWidth: payload.paperWidth,
+        receiptPrinterName: payload.receiptPrinterName,
+        kotPrinterName: payload.kotPrinterName,
       })
       .where(eq(printerSettings.id, 1));
   }
