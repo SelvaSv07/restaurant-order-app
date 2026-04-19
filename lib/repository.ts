@@ -5,6 +5,7 @@ import {
   bills,
   businessSettings,
   categories,
+  cloudSyncSettings,
   diningTables,
   inventoryItems,
   printerSettings,
@@ -18,6 +19,22 @@ import { percentageDiscount } from "@/lib/money";
 
 /** Exclude empty carts: no lines or total line qty is 0. */
 const billHasPositiveLineQty = sql`(select coalesce(sum(${billLines.qty}), 0) from ${billLines} where ${billLines.billId} = ${bills.id}) > 0`;
+
+/** Bootstrap table if migrations haven’t applied yet (keeps `next build` prerender paths working). */
+function ensureCloudSyncTableIfMissing() {
+  sqliteRaw.exec(`
+    CREATE TABLE IF NOT EXISTS cloud_sync_settings (
+      id integer PRIMARY KEY NOT NULL,
+      enabled integer DEFAULT false NOT NULL,
+      endpoint_base_url text DEFAULT '' NOT NULL,
+      store_id text DEFAULT '' NOT NULL,
+      sync_secret text DEFAULT '' NOT NULL,
+      last_sync_at integer,
+      last_error text DEFAULT '' NOT NULL,
+      last_payload_version integer DEFAULT 1 NOT NULL
+    );
+  `);
+}
 
 /** Apply printer column DDL if missing (older DB files; keeps `next build` prerender working). */
 function ensurePrinterDeviceColumnsIfMissing() {
@@ -39,6 +56,7 @@ function ensurePrinterDeviceColumnsIfMissing() {
 
 export async function ensureDefaults() {
   ensurePrinterDeviceColumnsIfMissing();
+  ensureCloudSyncTableIfMissing();
 
   const business = await db.select().from(businessSettings).where(eq(businessSettings.id, 1));
   if (business.length === 0) {
@@ -48,6 +66,11 @@ export async function ensureDefaults() {
   const printer = await db.select().from(printerSettings).where(eq(printerSettings.id, 1));
   if (printer.length === 0) {
     await db.insert(printerSettings).values({ id: 1 });
+  }
+
+  const cloudSync = await db.select().from(cloudSyncSettings).where(eq(cloudSyncSettings.id, 1));
+  if (cloudSync.length === 0) {
+    await db.insert(cloudSyncSettings).values({ id: 1 });
   }
 }
 

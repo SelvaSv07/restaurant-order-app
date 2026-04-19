@@ -20,6 +20,7 @@ const SETTINGS_PATHS = [
   "/settings/other",
   "/settings/printer",
   "/settings/tables",
+  "/settings/cloud-sync",
 ] as const;
 
 function revalidateSettings() {

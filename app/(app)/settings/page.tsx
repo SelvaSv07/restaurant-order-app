@@ -1,9 +1,15 @@
 import Link from "next/link";
-import { Building2, FolderTree, LayoutGrid, Package, Printer, Settings2, Warehouse } from "lucide-react";
+import { Building2, CloudUpload, FolderTree, LayoutGrid, Package, Printer, Settings2, Warehouse } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const sections = [
+  {
+    href: "/settings/cloud-sync",
+    title: "Cloud sync",
+    description: "Push data to your hosted master admin (chain dashboard).",
+    icon: CloudUpload,
+  },
   {
     href: "/settings/inventory",
     title: "Inventory items",

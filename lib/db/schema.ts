@@ -125,3 +125,15 @@ export const printerSettings = sqliteTable("printer_settings", {
   kotPrinterName: text("kot_printer_name").notNull().default(""),
 });
 
+/** Single-row settings for pushing snapshots to the hosted master admin API. */
+export const cloudSyncSettings = sqliteTable("cloud_sync_settings", {
+  id: integer("id").primaryKey(),
+  enabled: integer("enabled", { mode: "boolean" }).notNull().default(false),
+  endpointBaseUrl: text("endpoint_base_url").notNull().default(""),
+  storeId: text("store_id").notNull().default(""),
+  syncSecret: text("sync_secret").notNull().default(""),
+  lastSyncAt: integer("last_sync_at", { mode: "timestamp_ms" }),
+  lastError: text("last_error").notNull().default(""),
+  lastPayloadVersion: integer("last_payload_version").notNull().default(1),
+});
+

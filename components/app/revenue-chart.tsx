@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import {
   Bar,
   BarChart,
@@ -16,22 +15,6 @@ import { formatIstHourBucketLabel } from "@/lib/chart-series";
 import { formatINR } from "@/lib/money";
 
 type Point = { day: string; totalRupee: number };
-
-/** ~11 ticks (0 … top) for denser horizontal grid lines. */
-function revenueYAxisConfig(points: Point[]): { domain: [number, number]; ticks: number[] } {
-  const maxRupee = Math.max(0, ...points.map((p) => p.totalRupee));
-  if (maxRupee <= 0) {
-    const top = 100;
-    const segments = 10;
-    const ticks = Array.from({ length: segments + 1 }, (_, i) => Math.round((top * i) / segments));
-    return { domain: [0, top], ticks };
-  }
-  const padded = maxRupee * 1.12;
-  const top = Math.max(20, Math.ceil(padded / 20) * 20);
-  const segments = 10;
-  const ticks = Array.from({ length: segments + 1 }, (_, i) => Math.round((top * i) / segments));
-  return { domain: [0, top], ticks };
-}
 
 function formatDayTick(d: string) {
   if (/^\d{4}-\d{2}$/.test(d)) {
@@ -50,68 +33,36 @@ function formatDayTick(d: string) {
 
 export function RevenueChart({
   data,
-  chartBucket,
 }: {
   data: Point[];
+  /** Accepted for API compatibility with the dashboard page; visuals match master admin. */
   chartBucket?: ChartBucket;
 }) {
-  const isHourly = chartBucket === "hour";
-  const yAxis = useMemo(() => revenueYAxisConfig(data), [data]);
-
-  const xInterval = useMemo(() => {
-    /** Hourly (e.g. “Today”) — show every hour; do not subsample to 3h ticks. */
-    if (isHourly) return 0;
-    if (data.length > 16) return "preserveStartEnd";
-    return 0;
-  }, [data.length, isHourly]);
+  const chartData = data.map((d) => ({
+    label: formatDayTick(d.day),
+    revenue: d.totalRupee,
+    revenueLabel: formatINR(d.totalRupee),
+  }));
 
   return (
-    <div className="w-full min-w-0">
-      <ResponsiveContainer width="100%" height={220}>
-        <BarChart
-          data={data}
-          margin={{ top: 4, right: 2, left: -18, bottom: 2 }}
-          barCategoryGap={isHourly ? "10%" : "18%"}
-        >
-            <CartesianGrid stroke="#ebebeb" strokeDasharray="3 3" vertical horizontal />
-            <XAxis
-              dataKey="day"
-              tickFormatter={formatDayTick}
-              interval={xInterval}
-              angle={0}
-              textAnchor="middle"
-              height={22}
-              tickMargin={2}
-              tick={{ fill: "#858585", fontSize: isHourly ? 8 : 10 }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              domain={yAxis.domain}
-              ticks={yAxis.ticks}
-              tickFormatter={(value) => formatINR(Number(value))}
-              tick={{ fill: "#858585", fontSize: 10 }}
-              axisLine={false}
-              tickLine={false}
-              width={40}
-            />
-            <Tooltip
-              formatter={(value) => [formatINR(Number(value ?? 0)), "Revenue"]}
-              labelFormatter={(label) => formatDayTick(String(label))}
-              contentStyle={{
-                borderRadius: 8,
-                border: "none",
-                boxShadow: "0 4px 12px rgba(51,51,51,0.08)",
-                fontSize: 12,
-              }}
-            />
-          <Bar
-            dataKey="totalRupee"
-            name="Revenue"
-            fill="#ff6b1e"
-            radius={[6, 6, 0, 0]}
-            maxBarSize={isHourly ? 44 : 36}
+    <div className="h-[320px] w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={chartData} margin={{ left: 8, right: 12, top: 8, bottom: 8 }}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ebebeb" />
+          <XAxis
+            dataKey="label"
+            tick={{ fontSize: 11 }}
+            tickLine={false}
+            axisLine={false}
+            interval="preserveStartEnd"
           />
+          <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+          <Tooltip
+            formatter={(value) => [formatINR(Number(value ?? 0)), "Revenue"]}
+            labelFormatter={(label) => String(label)}
+            contentStyle={{ borderRadius: 12, border: "1px solid #ebebeb" }}
+          />
+          <Bar dataKey="revenue" fill="#ff6b1e" radius={[8, 8, 0, 0]} maxBarSize={56} />
         </BarChart>
       </ResponsiveContainer>
     </div>

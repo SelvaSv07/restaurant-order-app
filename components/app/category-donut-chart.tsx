@@ -43,11 +43,7 @@ export function CategoryDonutChart({ data }: { data: Row[] }) {
             </Pie>
             <Tooltip
               formatter={(value) => formatINR(Number(value ?? 0))}
-              contentStyle={{
-                borderRadius: 8,
-                border: "none",
-                boxShadow: "0 4px 12px rgba(51,51,51,0.08)",
-              }}
+              contentStyle={{ borderRadius: 12, border: "1px solid #ebebeb" }}
             />
           </PieChart>
         </ResponsiveContainer>

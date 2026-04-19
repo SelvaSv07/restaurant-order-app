@@ -44,9 +44,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     period === "custom"
       ? `Selected range · ${data.chart.length} ${chartBucket === "month" ? "months" : "days"}`
       : period === "today"
-        ? "Today · full day"
+        ? "Today · hourly"
         : period === "week"
-          ? `Past 7 days · ${data.chart.length} days`
+          ? `Past 7 days · ${data.chart.length} buckets`
           : period === "month"
             ? `This month · ${data.chart.length} days`
             : `This year · ${data.chart.length} months`;
@@ -58,7 +58,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       <div className="min-w-0 space-y-6">
         <div className="grid gap-4 sm:grid-cols-3">
           <StatCard
-            label="Total Orders"
+            label="Total orders"
             value={orders.toLocaleString("en-IN")}
             icon={Receipt}
             trendPct={pctChange(orders, prevOrders)}
@@ -70,7 +70,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             trendPct={pctChange(data.itemsSold, data.prevItemsSold)}
           />
           <StatCard
-            label="Total Revenue"
+            label="Total revenue"
             value={formatINR(revenue)}
             icon={IndianRupee}
             trendPct={pctChange(revenue, prevRevenue)}
@@ -78,37 +78,43 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </div>
 
         <div className="flex min-w-0 flex-col gap-6">
-          <DashboardPanel
-            title="Total Revenue"
-            titleAddon={periodLabel}
-            subtitle="Selected period · completed bills only (drafts excluded)"
-          >
+          <div className="rounded-xl bg-white p-4 shadow-[0_4px_24px_rgba(51,51,51,0.06)] ring-1 ring-[#ebebeb]">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-2 pb-3">
+              <div>
+                <p className="text-sm font-semibold text-[#333]">Revenue</p>
+                <p className="text-xs text-[#858585]">{periodLabel}</p>
+              </div>
+            </div>
             <RevenueChart data={data.chart} chartBucket={chartBucket} />
-          </DashboardPanel>
+          </div>
           <div className="grid min-w-0 gap-6 md:grid-cols-2">
-            <DashboardPanel title="Top Categories" subtitle="Share of sales by category">
+            <DashboardPanel
+              headerVariant="compact"
+              title="Top categories"
+              subtitle="Share of sales by category"
+            >
               <CategoryDonutChart data={data.categories} />
             </DashboardPanel>
-            <DashboardPanel title="Order Types" subtitle="Channel mix">
+            <DashboardPanel headerVariant="compact" title="Order types" subtitle="Channel mix">
               <OrderTypesPanel dineIn={data.orderTypes.dineIn} takeaway={data.orderTypes.takeaway} />
             </DashboardPanel>
           </div>
         </div>
 
-        <DashboardPanel
-          title="Recent Orders"
-          subtitle="Today orders only · Asia/Kolkata"
-          action={
-            <Link
-              href="/bills"
-              className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-[#ff6b1e] px-4 text-sm font-semibold text-white transition hover:bg-[#f55f0f]"
-            >
-              See All Orders
+        <div className="rounded-xl bg-white shadow-[0_4px_24px_rgba(51,51,51,0.06)] ring-1 ring-[#ebebeb]">
+          <div className="flex items-center justify-between border-b border-[#ebebeb] px-4 py-3">
+            <div>
+              <p className="text-sm font-semibold text-[#333]">Recent orders</p>
+              <p className="text-xs text-[#858585]">Today only · Asia/Kolkata</p>
+            </div>
+            <Link href="/bills" className="text-sm font-medium text-[#ff6b1e] hover:underline">
+              View all
             </Link>
-          }
-        >
-          <RecentOrdersTable rows={data.recentRows} />
-        </DashboardPanel>
+          </div>
+          <div className="overflow-x-auto px-4 pb-4 pt-1">
+            <RecentOrdersTable rows={data.recentRows} />
+          </div>
+        </div>
       </div>
     </div>
   );

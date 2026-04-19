@@ -16,6 +16,9 @@ let serverProcess = null;
 /** @type {BrowserWindow | null} */
 let mainWindow = null;
 
+/** @type {ReturnType<typeof setInterval> | null} */
+let cloudSyncIntervalId = null;
+
 function getAppRoot() {
   if (app.isPackaged) {
     return path.join(process.resourcesPath, "..");
@@ -164,6 +167,25 @@ function spawnNextServer(appRoot, port, dbPath) {
     windowsHide: true,
     detached: false,
   });
+}
+
+/** Fire-and-forget: Next returns 202 immediately; ingest runs in a background task after the response. */
+function triggerCloudSync(port) {
+  const url = `http://127.0.0.1:${port}/api/internal/cloud-sync`;
+  http
+    .get(url, (res) => {
+      res.resume();
+    })
+    .on("error", () => {
+      // ignore — sync errors are stored in cloud_sync_settings by the server
+    });
+}
+
+function clearCloudSyncTimer() {
+  if (cloudSyncIntervalId) {
+    clearInterval(cloudSyncIntervalId);
+    cloudSyncIntervalId = null;
+  }
 }
 
 function killServerProcess() {
@@ -502,6 +524,9 @@ async function start() {
     throw e;
   }
 
+  cloudSyncIntervalId = setInterval(() => triggerCloudSync(port), 5 * 60 * 1000);
+  setTimeout(() => triggerCloudSync(port), 15_000);
+
   const url = `http://127.0.0.1:${port}/`;
   createWindow(url);
 }
@@ -527,5 +552,6 @@ app.on("window-all-closed", () => {
 });
 
 app.on("before-quit", () => {
+  clearCloudSyncTimer();
   killServerProcess();
 });
