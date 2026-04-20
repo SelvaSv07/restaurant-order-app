@@ -5,6 +5,7 @@ import { useState } from "react";
 import { BillDetailDialog } from "@/components/app/bill-detail-dialog";
 import { BillsRowActions } from "@/components/app/bills-row-actions";
 import { formatIstParts, OrderTypeBadge, StatusBadge } from "@/components/app/bills-order-display";
+import { formatBillNumberDisplay } from "@/lib/bill-number-display";
 import { formatINR, shouldHideDraftZeroAmount, shouldHideDraftZeroQty } from "@/lib/money";
 import {
   Table,
@@ -74,7 +75,9 @@ export function RecentOrdersTable({ rows }: { rows: Row[] }) {
                       onClick={() => openDetail(bill.id)}
                     >
                       <TableCell className="align-middle">
-                        <span className="text-sm font-medium text-[#333]">ORD-{bill.billNumber}</span>
+                        <span className="text-sm font-medium text-[#333]">
+                          {formatBillNumberDisplay(bill.billNumber)}
+                        </span>
                       </TableCell>
                       <TableCell className="align-middle">
                         <span className="text-sm font-medium text-[#333]">{dateLine}</span>

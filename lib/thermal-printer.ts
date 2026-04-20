@@ -3,6 +3,8 @@
  * Ported from the working billing-desktop implementation.
  */
 
+import { formatOrderTypeLabel, type BillOrderType } from "@/lib/order-type-label";
+
 const ESC = 0x1b;
 const GS = 0x1d;
 
@@ -24,11 +26,12 @@ const COL_QTY_80 = 8;
 const COL_PRICE_80 = 16;
 
 // ── 58mm paper ─────────────────────────────────────────────────────────────────
-const LINE_58 = 32;
+// Many 58mm ESC/POS units wrap before 32 chars; 28 fits one line reliably (rule + item grid).
+const LINE_58 = 28;
 const SEP_58 = "-".repeat(LINE_58);
-const COL_ITEM_58 = 16;
-const COL_QTY_58 = 8;
-const COL_PRICE_58 = 8;
+const COL_ITEM_58 = 14;
+const COL_QTY_58 = 7;
+const COL_PRICE_58 = 7;
 
 function text(str: string): Buffer {
   return Buffer.from(str, "ascii");
@@ -72,6 +75,7 @@ export interface ReceiptData {
   address: string;
   billNumber: string;
   billDate: Date | number;
+  orderType: BillOrderType;
   items: Array<{ name: string; qty: number; lineTotal: number }>;
   subtotal: number;
   discount: number;
@@ -109,6 +113,7 @@ export function generateReceiptBytes(data: ReceiptData): Buffer {
   push(CMD.ALIGN_LEFT);
   push(line(`Bill No: ${data.billNumber}`));
   push(line(`Date: ${formatDate(data.billDate)}`));
+  push(line(`Order: ${formatOrderTypeLabel(data.orderType)}`));
 
   push(line(SEP));
 
@@ -148,7 +153,7 @@ export function generateReceiptBytes(data: ReceiptData): Buffer {
   if (data.headerText) push(line(data.headerText));
   if (data.footerText) push(line(data.footerText));
 
-  push(CMD.feedLines(4), CMD.PARTIAL_CUT);
+  push(CMD.feedLines(2), CMD.PARTIAL_CUT);
 
   return Buffer.concat(parts);
 }
@@ -158,6 +163,7 @@ export function generateReceiptBytes(data: ReceiptData): Buffer {
 export interface KotData {
   billNumber: string;
   billDate: Date | number;
+  orderType: BillOrderType;
   items: Array<{ name: string; qty: number }>;
   paperWidth: "58mm" | "80mm";
 }
@@ -182,6 +188,7 @@ export function generateKotBytes(data: KotData): Buffer {
   push(CMD.ALIGN_LEFT);
   push(line(`Bill No: ${data.billNumber}`));
   push(line(`Date: ${formatDate(data.billDate)}`));
+  push(line(`Order: ${formatOrderTypeLabel(data.orderType)}`));
 
   push(line(SEP));
 
@@ -194,7 +201,7 @@ export function generateKotBytes(data: KotData): Buffer {
   }
 
   push(line(SEP));
-  push(CMD.feedLines(4), CMD.PARTIAL_CUT);
+  push(CMD.feedLines(2), CMD.PARTIAL_CUT);
 
   return Buffer.concat(parts);
 }

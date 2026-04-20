@@ -1,7 +1,9 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { billLines, bills, businessSettings, printerSettings } from "@/lib/db/schema";
+import { formatBillNumberDisplay } from "@/lib/bill-number-display";
 import { formatINR } from "@/lib/money";
+import { formatOrderTypeLabel } from "@/lib/order-type-label";
 import { ensureDefaults } from "@/lib/repository";
 
 export default async function PrintBillPage({ params }: { params: Promise<{ billId: string }> }) {
@@ -18,7 +20,7 @@ export default async function PrintBillPage({ params }: { params: Promise<{ bill
     <main className={`mx-auto p-4 ${printer.paperWidth === "58mm" ? "max-w-[280px]" : "max-w-md"}`}>
       <h1 className="text-center text-lg font-semibold">{business.shopName}</h1>
       <p className="text-center text-xs">{business.address}</p>
-      <p className="mt-3 text-sm">Bill #{bill.billNumber}</p>
+      <p className="mt-3 text-sm">Bill #{formatBillNumberDisplay(bill.billNumber)}</p>
       <div className="mt-2 space-y-1 text-sm">
         {lines.map((line) => (
           <div key={line.id} className="flex justify-between">
@@ -29,7 +31,7 @@ export default async function PrintBillPage({ params }: { params: Promise<{ bill
           </div>
         ))}
       </div>
-      <hr className="my-2" />
+      <hr className="my-1.5" />
       <p className="flex justify-between text-sm">
         <span>Subtotal</span>
         <span>{formatINR(bill.subtotalRupee)}</span>
@@ -42,8 +44,8 @@ export default async function PrintBillPage({ params }: { params: Promise<{ bill
         <span>Total</span>
         <span>{formatINR(bill.totalRupee)}</span>
       </p>
-      <p className="mt-3 text-center text-xs">{printer.headerText}</p>
-      <p className="text-center text-xs">{printer.footerText}</p>
+      <p className="mt-2 text-center text-xs leading-snug">{printer.headerText}</p>
+      <p className="text-center text-xs leading-snug">{printer.footerText}</p>
     </main>
   );
 }

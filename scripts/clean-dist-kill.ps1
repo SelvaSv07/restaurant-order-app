@@ -1,4 +1,4 @@
-# Stops processes that lock dist/ (Restaurant Order from win-unpacked, node server, etc.).
+# Stops processes that lock dist/ (Starkhub from win-unpacked, node server, etc.).
 # CLEAN_TARGET_DIR = absolute path to the electron-builder output folder (usually .../dist).
 $ErrorActionPreference = 'SilentlyContinue'
 
@@ -26,7 +26,7 @@ function Test-UsesPath {
   return $false
 }
 
-taskkill /F /IM "Restaurant Order.exe" /T 2>$null
+taskkill /F /IM "Starkhub.exe" /T 2>$null
 
 Get-CimInstance Win32_Process | ForEach-Object {
   if (-not (Test-UsesPath -Cl $_.CommandLine -Ex $_.ExecutablePath -Root $targetFull)) { return }

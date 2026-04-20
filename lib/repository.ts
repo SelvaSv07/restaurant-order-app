@@ -228,7 +228,11 @@ export async function getSettingsData() {
 
 type DbTx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
-/** Next ORD-ddmmyy-### for today (IST). Must run on the same DB handle / transaction as the insert. */
+/**
+ * Next `ddmmyy-###` for today (IST). Sequence is numeric (1, 2, … 100, 101, … 999, 1000, …).
+ * Pad to at least 3 digits for 1–999; 1000+ uses natural width (no leading-zero truncation).
+ * Max is taken numerically (not string sort) so order stays correct after 999.
+ */
 function nextBillNumberInTx(tx: DbTx) {
   const todayPrefix = new Intl.DateTimeFormat("en-IN", {
     year: "2-digit",
@@ -239,17 +243,23 @@ function nextBillNumberInTx(tx: DbTx) {
     .format(new Date())
     .replace(/\//g, "");
 
-  const match = tx
+  const withPrefix = `${todayPrefix}-`;
+  const rows = tx
     .select({ billNumber: bills.billNumber })
     .from(bills)
     .where(sql`${bills.billNumber} like ${`${todayPrefix}-%`}`)
-    .orderBy(desc(bills.billNumber))
-    .limit(1)
     .all();
 
-  const current = match[0]?.billNumber;
-  const seq = current ? Number.parseInt(current.split("-")[1] ?? "0", 10) + 1 : 1;
-  return `${todayPrefix}-${String(seq).padStart(3, "0")}`;
+  let maxSeq = 0;
+  for (const row of rows) {
+    if (!row.billNumber.startsWith(withPrefix)) continue;
+    const suffix = row.billNumber.slice(withPrefix.length);
+    const n = Number.parseInt(suffix, 10);
+    if (!Number.isNaN(n) && n > maxSeq) maxSeq = n;
+  }
+  const next = maxSeq + 1;
+  const seqStr = next < 1000 ? String(next).padStart(3, "0") : String(next);
+  return `${todayPrefix}-${seqStr}`;
 }
 
 /**

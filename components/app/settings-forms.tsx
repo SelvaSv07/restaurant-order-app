@@ -223,7 +223,7 @@ export function PrinterForm({
         {printerListError ? <p className="text-xs text-red-600">{printerListError}</p> : null}
         {showBrowserNotice ? (
           <p className="rounded-lg bg-[#f7f7f7] px-3 py-2 text-xs text-[#858585]">
-            Printer names are applied when you run the Restaurant Order desktop app (Electron). In the browser, printing
+            Printer names are applied when you run the Starkhub desktop app (Electron). In the browser, printing
             still uses the normal print dialog.
           </p>
         ) : null}

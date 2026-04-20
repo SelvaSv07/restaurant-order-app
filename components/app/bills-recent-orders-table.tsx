@@ -7,6 +7,7 @@ import { BillDetailDialog } from "@/components/app/bill-detail-dialog";
 import { BillsRowActions } from "@/components/app/bills-row-actions";
 import { formatIstParts, OrderTypeBadge, StatusBadge } from "@/components/app/bills-order-display";
 import { bills } from "@/lib/db/schema";
+import { formatBillNumberDisplay } from "@/lib/bill-number-display";
 import { formatINR, shouldHideDraftZeroAmount, shouldHideDraftZeroQty } from "@/lib/money";
 import {
   Table,
@@ -69,7 +70,9 @@ export function BillsRecentOrdersTable({
                   onClick={() => openDetail(bill.id)}
                 >
                   <TableCell className="align-middle">
-                    <span className="text-sm font-medium text-[#333]">ORD-{bill.billNumber}</span>
+                    <span className="text-sm font-medium text-[#333]">
+                      {formatBillNumberDisplay(bill.billNumber)}
+                    </span>
                   </TableCell>
                   <TableCell className="align-middle">
                     <span className="text-sm font-medium text-[#333]">{dateLine}</span>

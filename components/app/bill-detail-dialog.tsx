@@ -20,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatBillNumberDisplay } from "@/lib/bill-number-display";
 import { formatINR } from "@/lib/money";
 import { printReceiptToConfiguredDevice } from "@/lib/print-client";
 function toDate(d: Date | string): Date {
@@ -98,7 +99,7 @@ function BillDetailBody({
       <div className="max-h-[min(90vh,720px)] overflow-y-auto p-6">
         <DialogHeader className="text-left">
           <DialogTitle className="text-lg">
-            {bill ? `ORD-${bill.billNumber}` : "Bill details"}
+            {bill ? formatBillNumberDisplay(bill.billNumber) : "Bill details"}
           </DialogTitle>
           <DialogDescription className="sr-only">
             Order line items and totals for this bill.

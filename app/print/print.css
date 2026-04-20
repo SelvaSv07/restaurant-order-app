@@ -1,0 +1,10 @@
+/* Tighter margins for thermal / receipt print preview */
+@page {
+  margin: 6mm 8mm;
+}
+
+@media print {
+  body {
+    margin: 0;
+  }
+}

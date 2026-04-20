@@ -47,7 +47,7 @@ async function main() {
         continue;
       }
       console.error(
-        "Could not remove dist/ (still in use). Close Restaurant Order, close Explorer windows on dist\\, then run: npm run clean:dist",
+        "Could not remove dist/ (still in use). Close Starkhub, close Explorer windows on dist\\, then run: npm run clean:dist",
       );
       process.exit(1);
     }

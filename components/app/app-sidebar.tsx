@@ -6,24 +6,25 @@ import { Settings } from "lucide-react";
 
 import { SidebarNav } from "@/components/sidebar-nav";
 
-const logoSymbol = "https://www.figma.com/api/mcp/asset/712fbe8e-e10c-41ba-9b1d-9b770192e8be";
-
 export function AppSidebar() {
   return (
     <aside className="sticky top-0 flex h-dvh w-[241px] shrink-0 flex-col overflow-hidden border-r border-[#ebebeb] bg-[#fdfdfd] px-5 pb-5 pt-6">
       <div className="shrink-0 px-3 pb-6">
-        <Link href="/dashboard" className="flex cursor-pointer items-center gap-2">
-          <span className="relative size-6 shrink-0">
-            <Image
-              src={logoSymbol}
-              alt="Reztro"
-              width={24}
-              height={24}
-              className="size-6"
-              unoptimized
-            />
+        <Link
+          href="/dashboard"
+          className="flex min-w-0 w-full cursor-pointer items-center gap-2.5 rounded-full bg-black px-3 py-2 shadow-sm transition hover:bg-neutral-900"
+        >
+          <Image
+            src="/stark_hub_logo.webp"
+            alt=""
+            width={32}
+            height={32}
+            className="size-7 shrink-0 object-contain"
+            priority
+          />
+          <span className="min-w-0 truncate text-[15px] font-semibold tracking-tight text-white">
+            Starkhub
           </span>
-          <span className="text-2xl font-semibold tracking-tight text-[#333]">Reztro</span>
         </Link>
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-8 overflow-y-auto">

@@ -11,6 +11,7 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    "dist/**",
     "next-env.d.ts",
     // CommonJS entrypoints use require(); not linted as TS modules
     "electron/**/*.cjs",

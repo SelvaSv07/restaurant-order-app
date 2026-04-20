@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { bills, billLines, printerSettings } from "@/lib/db/schema";
 import { ensureDefaults } from "@/lib/repository";
+import { formatBillNumberDisplay } from "@/lib/bill-number-display";
 import { generateKotBytes } from "@/lib/thermal-printer";
 import { sendRawToPrinter } from "@/lib/print-raw";
 
@@ -51,8 +52,9 @@ export async function POST(
     }
 
     const kotBytes = generateKotBytes({
-      billNumber: bill.billNumber,
+      billNumber: formatBillNumberDisplay(bill.billNumber),
       billDate: bill.createdAt,
+      orderType: bill.orderType,
       items: itemsToPrint.map((l) => ({
         name: l.productNameSnapshot,
         qty: l.qty,
@@ -60,7 +62,7 @@ export async function POST(
       paperWidth: printer.paperWidth,
     });
 
-    sendRawToPrinter(printer.kotPrinterName, kotBytes, `KOT-${bill.billNumber}`);
+    sendRawToPrinter(printer.kotPrinterName, kotBytes, `KOT-${formatBillNumberDisplay(bill.billNumber)}`);
 
     return NextResponse.json({ ok: true });
   } catch (error) {

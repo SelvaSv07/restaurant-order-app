@@ -1,7 +1,7 @@
 {
   "name": "restaurant-order-app",
   "version": "0.1.0",
-  "description": "Restaurant order management — local desktop app (Next.js + Electron).",
+  "description": "Starkhub — restaurant order management (Next.js + Electron).",
   "private": true,
   "main": "electron/main.cjs",
   "homepage": "./",
@@ -62,8 +62,9 @@
     "typescript": "^5"
   },
   "build": {
-    "appId": "com.restaurantorder.app",
-    "productName": "Restaurant Order",
+    "appId": "com.starkhub.app",
+    "productName": "Starkhub",
+    "icon": "public/favicon.ico",
     "npmRebuild": false,
     "forceCodeSigning": false,
     "directories": {

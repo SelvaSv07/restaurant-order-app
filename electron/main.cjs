@@ -493,9 +493,8 @@ function createWindow(url) {
     }
   });
 
-  mainWindow.on("close", () => {
-    killServerProcess();
-  });
+  // Do not kill the Next server here: hidden/child windows (e.g. print preview) may still
+  // need localhost until they close. Cleanup runs in app "before-quit" / "window-all-closed".
   mainWindow.loadURL(url);
   mainWindow.on("closed", () => {
     mainWindow = null;
@@ -504,7 +503,7 @@ function createWindow(url) {
 
 async function start() {
   if (app.isPackaged) {
-    app.setName("Restaurant Order");
+    app.setName("Starkhub");
   }
   const appRoot = getAppRoot();
   const userDataDir = app.getPath("userData");

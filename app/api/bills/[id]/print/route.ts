@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { bills, billLines, businessSettings, printerSettings } from "@/lib/db/schema";
 import { ensureDefaults } from "@/lib/repository";
+import { formatBillNumberDisplay } from "@/lib/bill-number-display";
 import { generateReceiptBytes } from "@/lib/thermal-printer";
 import { sendRawToPrinter } from "@/lib/print-raw";
 
@@ -37,8 +38,9 @@ export async function POST(
     const receiptBytes = generateReceiptBytes({
       shopName: business.shopName,
       address: business.address,
-      billNumber: bill.billNumber,
+      billNumber: formatBillNumberDisplay(bill.billNumber),
       billDate: bill.createdAt,
+      orderType: bill.orderType,
       items: lines.map((l) => ({
         name: l.productNameSnapshot,
         qty: l.qty,
@@ -53,7 +55,11 @@ export async function POST(
       paperWidth: printer.paperWidth,
     });
 
-    sendRawToPrinter(printer.receiptPrinterName, receiptBytes, `Receipt-${bill.billNumber}`);
+    sendRawToPrinter(
+      printer.receiptPrinterName,
+      receiptBytes,
+      `Receipt-${formatBillNumberDisplay(bill.billNumber)}`,
+    );
 
     return NextResponse.json({ ok: true });
   } catch (error) {

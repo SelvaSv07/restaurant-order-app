@@ -1,10 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
   BarChart3,
   ClipboardList,
-  Coffee,
   CookingPot,
   Package2,
   ReceiptText,
@@ -28,12 +28,16 @@ export function CafeSidebar() {
   return (
     <aside className="flex min-h-screen w-[237px] shrink-0 flex-col border-r border-[#d6d6d6] bg-white">
       <div className="flex flex-col gap-6 px-5 pb-6 pt-6">
-        <div className="flex items-center gap-2.5">
-          <span className="flex size-9 items-center justify-center rounded-lg bg-[#f97316]/10 text-[#f97316]">
-            <Coffee className="size-6" strokeWidth={2} />
-          </span>
-          <span className="text-[28px] font-extrabold tracking-tight text-[#454545]">CafePOS</span>
-        </div>
+        <Link href="/dashboard" className="flex items-center">
+          <Image
+            src="/stark_hub_logo.webp"
+            alt="Starkhub"
+            width={180}
+            height={44}
+            className="h-10 w-auto max-w-[200px] object-contain object-left"
+            priority
+          />
+        </Link>
         <div className="h-px w-full bg-[#d6d6d6]" />
       </div>
       <nav className="flex flex-col gap-9 px-5">
