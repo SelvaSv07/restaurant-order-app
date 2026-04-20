@@ -9,9 +9,9 @@ const figtree = Figtree({
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${figtree.className} flex min-h-dvh bg-[#fdfdfd]`}>
+      <div className={`${figtree.className} flex h-full min-h-0 flex-1 overflow-hidden bg-[#fdfdfd]`}>
       <AppSidebar />
-      <main className="min-h-0 min-w-0 flex-1 overflow-auto p-8">{children}</main>
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto px-4 py-0 sm:px-5">{children}</main>
     </div>
   );
 }

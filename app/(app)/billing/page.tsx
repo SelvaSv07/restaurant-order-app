@@ -31,9 +31,9 @@ export default async function BillingPage({ searchParams }: PageProps) {
   });
 
   return (
-    <div className="mx-auto flex w-full min-w-0 max-w-[min(100%,1760px)] flex-1 flex-col lg:min-h-0 lg:h-[calc(100dvh-1.5rem)] sm:lg:h-[calc(100dvh-2rem)] lg:overflow-hidden">
-      <div className="flex min-h-0 w-full flex-1 flex-col gap-6 lg:h-full lg:min-h-0 lg:flex-row lg:gap-6 lg:overflow-hidden">
-        <div className="min-h-0 min-w-0 flex-1 lg:h-full lg:min-h-0">
+    <div className="mx-auto flex w-full min-w-0 max-w-[min(100%,1760px)] flex-1 flex-col min-h-0 lg:h-full lg:min-h-0 lg:overflow-hidden">
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-6 lg:h-full lg:min-h-0 lg:flex-row lg:items-stretch lg:gap-6 lg:overflow-hidden">
+        <div className="min-h-0 min-w-0 flex-1 pt-8 lg:h-full lg:min-h-0">
           <BillingMenuSection
             categoryFilteredProducts={categoryFilteredProducts}
             allCategories={allCategories}
@@ -44,7 +44,7 @@ export default async function BillingPage({ searchParams }: PageProps) {
           />
         </div>
 
-        <aside className="flex min-h-0 w-full min-w-0 flex-col rounded-[15px] bg-white p-4 shadow-sm ring-1 ring-black/[0.04] max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)] lg:h-full lg:max-h-full lg:w-[360px] lg:max-w-[360px] lg:shrink-0 lg:overflow-hidden">
+        <aside className="flex min-h-0 w-full min-w-0 flex-col rounded-[15px] border border-[#ebebeb] bg-white p-4 shadow-sm max-h-[min(70vh,calc(100dvh-8rem))] lg:my-4 lg:max-h-none lg:w-[360px] lg:max-w-[360px] lg:shrink-0 lg:overflow-hidden lg:self-stretch">
           <div className="flex shrink-0 items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-[#454545]">Current order</h2>
             <span className="inline-flex max-w-[55%] shrink-0 items-center truncate rounded-full border border-[#e8e8e8] bg-[#fafafa] px-2.5 py-0.5 text-xs font-semibold text-[#454545]">

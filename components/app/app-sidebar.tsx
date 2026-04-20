@@ -8,7 +8,7 @@ import { SidebarNav } from "@/components/sidebar-nav";
 
 export function AppSidebar() {
   return (
-    <aside className="sticky top-0 flex h-dvh w-[241px] shrink-0 flex-col overflow-hidden border-r border-[#ebebeb] bg-[#fdfdfd] px-5 pb-5 pt-6">
+    <aside className="flex h-full min-h-0 w-[241px] shrink-0 flex-col overflow-hidden border-r border-[#ebebeb] bg-[#fdfdfd] px-5 pb-5 pt-6">
       <div className="shrink-0 px-3 pb-6">
         <Link
           href="/dashboard"

@@ -54,7 +54,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 py-8">
       <InventoryStockLevelCard
         totalProducts={allItems.length}
         inCount={inCount}

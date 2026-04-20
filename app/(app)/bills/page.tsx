@@ -159,7 +159,7 @@ export default async function BillsPage({ searchParams }: { searchParams: Promis
   const pagination = buildPaginationItems(safePage, totalPages, base);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 py-8">
       <BillsHeader />
       <div className="min-w-0 space-y-6">
         <BillsAnalyticsSection

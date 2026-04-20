@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Ensure the document fills the viewport so app shells (flex + h-full) don’t leave body background gaps. */
+html {
+  height: 100%;
+}
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -54,7 +59,7 @@
 }
 
 body {
-  @apply bg-background text-foreground;
+  @apply bg-[#fdfdfd] text-foreground;
 }
 
 /* Sonner applies classNames.toast; ensure opaque surface if theme vars are missing */

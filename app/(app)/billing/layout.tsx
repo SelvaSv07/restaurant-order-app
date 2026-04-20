@@ -1,7 +1,3 @@
 export default function BillingLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="-mx-3 px-2.5 sm:-mx-4 sm:px-3.5">
-      {children}
-    </div>
-  );
+  return <div className="min-w-0 w-full">{children}</div>;
 }

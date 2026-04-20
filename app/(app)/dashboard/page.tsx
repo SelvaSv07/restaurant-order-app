@@ -52,7 +52,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             : `This year · ${data.chart.length} months`;
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 py-8">
       <DashboardHeader />
 
       <div className="min-w-0 space-y-6">

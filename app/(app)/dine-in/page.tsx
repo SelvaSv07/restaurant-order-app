@@ -51,7 +51,7 @@ export default async function DineInPage({ searchParams }: PageProps) {
 
   if (tables.length === 0) {
     return (
-      <div className="mx-auto flex w-full min-w-0 max-w-[min(100%,1760px)] flex-1 flex-col gap-6">
+      <div className="mx-auto flex w-full min-w-0 max-w-[min(100%,1760px)] flex-1 flex-col gap-6 py-8">
         <div className="rounded-[15px] border border-dashed border-[#d6d6d6] bg-white p-10 text-center shadow-sm ring-1 ring-black/[0.04]">
           <p className="text-sm font-medium text-[#7a7a7a]">No tables configured yet.</p>
           <Link
@@ -74,9 +74,9 @@ export default async function DineInPage({ searchParams }: PageProps) {
   const selectedTable = tables.find((t) => t.id === selectedTableId);
 
   return (
-    <div className="mx-auto flex w-full min-w-0 max-w-[min(100%,1760px)] flex-1 flex-col lg:min-h-0 lg:h-[calc(100dvh-1.5rem)] sm:lg:h-[calc(100dvh-2rem)] lg:overflow-hidden">
-      <div className="flex min-h-0 w-full flex-1 flex-col gap-6 lg:h-full lg:min-h-0 lg:flex-row lg:gap-6 lg:overflow-hidden">
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col lg:h-full lg:min-h-0">
+    <div className="mx-auto flex w-full min-w-0 max-w-[min(100%,1760px)] flex-1 flex-col min-h-0 lg:h-full lg:min-h-0 lg:overflow-hidden">
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-6 lg:h-full lg:min-h-0 lg:flex-row lg:items-stretch lg:gap-6 lg:overflow-hidden">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col pt-8 lg:h-full lg:min-h-0">
           <div className="flex shrink-0 flex-col gap-6 pr-2">
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <span className="w-full text-xs font-semibold uppercase tracking-wide text-[#7a7a7a] sm:mr-1 sm:w-auto">
@@ -162,7 +162,7 @@ export default async function DineInPage({ searchParams }: PageProps) {
           </ScrollArea>
         </div>
 
-        <aside className="flex min-h-0 w-full min-w-0 flex-col rounded-[15px] bg-white p-4 shadow-sm ring-1 ring-black/[0.04] max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)] lg:h-full lg:max-h-full lg:w-[360px] lg:max-w-[360px] lg:shrink-0 lg:overflow-hidden">
+        <aside className="flex min-h-0 w-full min-w-0 flex-col rounded-[15px] border border-[#ebebeb] bg-white p-4 shadow-sm max-h-[min(70vh,calc(100dvh-8rem))] lg:my-4 lg:max-h-none lg:w-[360px] lg:max-w-[360px] lg:shrink-0 lg:overflow-hidden lg:self-stretch">
           <div className="flex shrink-0 items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-[#454545]">Current order</h2>
             {selectedTable ? (
