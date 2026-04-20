@@ -26,9 +26,10 @@ function getAppRoot() {
   return path.join(__dirname, "..");
 }
 
-/** Same asset as Next `/favicon.ico` — window / taskbar icon (Windows: .ico). */
+/** App window icon — prefer 512×512 PNG (matches electron-builder); .ico fallback. */
 function resolveAppIconPath() {
   const candidates = [
+    path.join(__dirname, "..", "public", "android-chrome-512x512.png"),
     path.join(__dirname, "..", "public", "favicon.ico"),
     path.join(__dirname, "favicon.ico"),
   ];

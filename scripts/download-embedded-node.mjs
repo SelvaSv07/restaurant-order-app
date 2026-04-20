@@ -17,8 +17,12 @@ const root = path.join(__dirname, "..");
 const outDir = path.join(root, "build", "node-runtime");
 const zipPath = path.join(root, "build", "node-win-x64.zip");
 
-/** Must match the Node used for `next build` so better-sqlite3 matches at runtime. */
-const NODE_VERSION = process.version.slice(1);
+/**
+ * Pinned Node for the embedded `node.exe` (Windows packaged app).
+ * Use this same version when running `npm run build` / `electron:dist` so native modules match.
+ * See `engines.node` in package.json.
+ */
+const NODE_VERSION = "22.22.0";
 const ZIP_URL = `https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-win-x64.zip`;
 const SHASUMS_URL = `https://nodejs.org/dist/v${NODE_VERSION}/SHASUMS256.txt`;
 
@@ -33,11 +37,11 @@ function embeddedMatchesBuild() {
   if (!existsSync(nodeExe)) return false;
   try {
     const v = execFileSync(nodeExe, ["-p", "process.version"], { encoding: "utf8" }).trim();
-    if (v === process.version) {
-      console.log("Embedded Node matches build Node:", v);
+    if (v === `v${NODE_VERSION}`) {
+      console.log("Embedded Node matches pinned version:", v);
       return true;
     }
-    console.log("Embedded Node is", v, "but build uses", process.version, "— replacing.");
+    console.log("Embedded Node is", v, "but pinned is", `v${NODE_VERSION}`, "— replacing.");
   } catch {
     console.log("Could not read embedded Node version — replacing.");
   }
@@ -75,7 +79,7 @@ function sha256File(file) {
   });
 }
 
-console.log("Downloading Node.js", NODE_VERSION, "win-x64 (matches", process.version, ")…");
+console.log("Downloading Node.js", NODE_VERSION, "win-x64 (pinned; run builds with Node", `v${NODE_VERSION}`, ")…");
 await download(ZIP_URL, zipPath);
 
 const shasumsRes = await fetch(SHASUMS_URL);

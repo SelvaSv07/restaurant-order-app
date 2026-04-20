@@ -2,7 +2,11 @@
   "name": "restaurant-order-app",
   "version": "0.1.0",
   "description": "Starkhub — restaurant order management (Next.js + Electron).",
+  "author": "Selva",
   "private": true,
+  "engines": {
+    "node": "22.22.x"
+  },
   "main": "electron/main.cjs",
   "homepage": "./",
   "scripts": {
@@ -64,7 +68,7 @@
   "build": {
     "appId": "com.starkhub.app",
     "productName": "Starkhub",
-    "icon": "public/favicon.ico",
+    "icon": "public/android-chrome-512x512.png",
     "npmRebuild": false,
     "forceCodeSigning": false,
     "directories": {
@@ -73,7 +77,8 @@
     "files": [
       "electron/**/*",
       "package.json",
-      "public/favicon.ico"
+      "public/favicon.ico",
+      "public/android-chrome-512x512.png"
     ],
     "extraResources": [
       {
@@ -86,7 +91,7 @@
       }
     ],
     "win": {
-      "icon": "public/favicon.ico",
+      "icon": "public/android-chrome-512x512.png",
       "signAndEditExecutable": false,
       "signDlls": false,
       "target": [
