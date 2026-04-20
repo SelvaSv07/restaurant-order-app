@@ -38,7 +38,6 @@ export default async function BillingPage({ searchParams }: PageProps) {
             categoryFilteredProducts={categoryFilteredProducts}
             allCategories={allCategories}
             categoryId={categoryId}
-            rawCat={rawCat}
             initialQ={sp.q ?? ""}
             billId={bill.id}
             lines={billData.lines}

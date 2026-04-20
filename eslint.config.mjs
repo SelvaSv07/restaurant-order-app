@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // CommonJS entrypoints use require(); not linted as TS modules
+    "electron/**/*.cjs",
+    "scripts/**/*.cjs",
   ]),
 ]);
 

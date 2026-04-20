@@ -21,7 +21,6 @@ export function BillingMenuSection({
   categoryFilteredProducts,
   allCategories,
   categoryId,
-  rawCat,
   initialQ,
   billId,
   lines,
@@ -29,7 +28,6 @@ export function BillingMenuSection({
   categoryFilteredProducts: Product[];
   allCategories: Category[];
   categoryId: number | null;
-  rawCat: string;
   initialQ: string;
   billId: number;
   lines: BillLineRow[];

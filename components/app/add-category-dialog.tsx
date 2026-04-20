@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { createCategoryAction } from "@/app/(app)/settings/actions";
@@ -28,24 +28,26 @@ export function AddCategoryDialog({ takenColorHexes }: { takenColorHexes: string
   const [iconKey, setIconKey] = useState("Utensils");
   const [colorHex, setColorHex] = useState<CategoryPaletteColor>(CATEGORY_PALETTE_COLORS[0]);
 
-  const takenKey = useMemo(() => takenColorHexes.slice().sort().join("|"), [takenColorHexes]);
   const takenSet = useMemo(
     () => new Set(takenColorHexes.map((h) => normalizeColorHex(h)).filter(Boolean)),
-    [takenKey],
+    [takenColorHexes],
   );
 
   const noFreeColor = useMemo(() => firstAvailablePaletteColor(takenSet) === null, [takenSet]);
 
-  useEffect(() => {
-    if (!open) return;
-    setIconKey("Utensils");
-    const next = firstAvailablePaletteColor(takenSet);
-    if (next) setColorHex(next);
-    else setColorHex(CATEGORY_PALETTE_COLORS[0]);
-  }, [open, takenSet]);
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (next) {
+          setIconKey("Utensils");
+          const pick = firstAvailablePaletteColor(takenSet);
+          if (pick) setColorHex(pick);
+          else setColorHex(CATEGORY_PALETTE_COLORS[0]);
+        }
+      }}
+    >
       <DialogTrigger
         type="button"
         className="inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border-0 bg-[#ff6b1e] px-4 text-xs font-semibold text-white shadow-none outline-none transition hover:bg-[#ea580c] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"

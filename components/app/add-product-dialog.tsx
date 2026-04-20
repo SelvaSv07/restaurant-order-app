@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { createProductAction } from "@/app/(app)/settings/actions";
 import { Button } from "@/components/ui/button";
@@ -34,16 +34,16 @@ export function AddProductDialog({
   }, []);
 
   const firstCategoryId = categories[0]?.id;
-  useEffect(() => {
-    if (open && firstCategoryId != null) setCategoryId(String(firstCategoryId));
-  }, [open, firstCategoryId]);
 
   return (
     <Dialog
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
-        if (next) setPhotoOk(true);
+        if (next) {
+          setPhotoOk(true);
+          if (firstCategoryId != null) setCategoryId(String(firstCategoryId));
+        }
       }}
     >
       <DialogTrigger
@@ -126,10 +126,10 @@ export function AddProductDialog({
             Include in KOT
           </label>
           <ProductPhotoFileField
+            key={String(open)}
             id="prod-image"
             label="Photo (optional)"
             labelClassName={labelClass}
-            open={open}
             onValidationChange={onPhotoValidation}
           />
           <Button

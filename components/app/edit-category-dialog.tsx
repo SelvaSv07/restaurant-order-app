@@ -1,7 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { updateCategoryAction } from "@/app/(app)/settings/actions";
@@ -38,6 +38,84 @@ export type EditCategoryDialogCategory = {
   colorHex: string;
 };
 
+function EditCategoryForm({
+  category,
+  takenByOthers,
+  onSaved,
+}: {
+  category: EditCategoryDialogCategory;
+  takenByOthers: Set<string>;
+  onSaved: () => void;
+}) {
+  const [iconKey, setIconKey] = useState(category.iconKey);
+  const [colorHex, setColorHex] = useState<CategoryPaletteColor>(() => {
+    if (isPaletteColor(category.colorHex)) return normalizeColorHex(category.colorHex) as CategoryPaletteColor;
+    const next = firstAvailablePaletteColor(takenByOthers);
+    return next ?? CATEGORY_PALETTE_COLORS[0];
+  });
+
+  const legacyColor = !isPaletteColor(category.colorHex);
+
+  return (
+    <form
+      action={async (fd) => {
+        const result = await updateCategoryAction(fd);
+        if (!result.ok) {
+          toast.error(result.error);
+          return;
+        }
+        onSaved();
+      }}
+      className="grid gap-4 px-5 pb-5 pt-4"
+    >
+      <input type="hidden" name="categoryId" value={category.id} />
+      <input type="hidden" name="iconKey" value={iconKey} />
+      <div className="grid gap-2">
+        <Label htmlFor={`cat-edit-name-${category.id}`} className={labelClass}>
+          Name
+        </Label>
+        <Input
+          id={`cat-edit-name-${category.id}`}
+          name="name"
+          required
+          defaultValue={category.name}
+          placeholder="Category name"
+          className={cn(fieldClass, "cursor-text text-[#333] placeholder:text-[#a3a3a3]")}
+        />
+      </div>
+      <div className="grid gap-2">
+        <span className={labelClass}>Icon</span>
+        <CategoryIconPicker
+          id={`cat-edit-icon-${category.id}`}
+          value={iconKey}
+          onChange={setIconKey}
+          accentColor={colorHex}
+        />
+      </div>
+      <div className="grid gap-2">
+        <span className={labelClass}>Color</span>
+        {legacyColor && (
+          <p className="text-xs leading-snug text-amber-800">
+            This category&apos;s saved color isn&apos;t in the current palette. Choose one of the colors below.
+          </p>
+        )}
+        <CategoryColorPicker
+          name="colorHex"
+          value={colorHex}
+          onChange={setColorHex}
+          takenByOtherCategories={takenByOthers}
+        />
+      </div>
+      <Button
+        type="submit"
+        className="mt-1 h-10 w-full border-0 bg-[#ff6b1e] text-sm font-semibold text-white shadow-none hover:bg-[#ea580c] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"
+      >
+        Save changes
+      </Button>
+    </form>
+  );
+}
+
 export function EditCategoryDialog({
   category,
   otherCategoriesColorHexes,
@@ -46,40 +124,13 @@ export function EditCategoryDialog({
   otherCategoriesColorHexes: string[];
 }) {
   const [open, setOpen] = useState(false);
-  const [iconKey, setIconKey] = useState(category.iconKey);
-  const [colorHex, setColorHex] = useState<CategoryPaletteColor>(() => {
-    if (isPaletteColor(category.colorHex)) return normalizeColorHex(category.colorHex) as CategoryPaletteColor;
-    return CATEGORY_PALETTE_COLORS[0];
-  });
 
-  const othersKey = useMemo(() => otherCategoriesColorHexes.slice().sort().join("|"), [otherCategoriesColorHexes]);
   const takenByOthers = useMemo(
     () => new Set(otherCategoriesColorHexes.map((h) => normalizeColorHex(h)).filter(Boolean)),
-    [othersKey],
+    [otherCategoriesColorHexes],
   );
 
-  const legacyColor = !isPaletteColor(category.colorHex);
-
-  useEffect(() => {
-    setIconKey(category.iconKey);
-    if (isPaletteColor(category.colorHex)) {
-      setColorHex(normalizeColorHex(category.colorHex) as CategoryPaletteColor);
-    } else {
-      const next = firstAvailablePaletteColor(takenByOthers);
-      if (next) setColorHex(next);
-    }
-  }, [category.id, category.iconKey, category.colorHex, takenByOthers]);
-
-  useEffect(() => {
-    if (!open) return;
-    setIconKey(category.iconKey);
-    if (isPaletteColor(category.colorHex)) {
-      setColorHex(normalizeColorHex(category.colorHex) as CategoryPaletteColor);
-    } else {
-      const next = firstAvailablePaletteColor(takenByOthers);
-      if (next) setColorHex(next);
-    }
-  }, [open, category.id, category.iconKey, category.colorHex, takenByOthers]);
+  const formKey = `${open}-${category.id}-${category.iconKey}-${category.colorHex}-${category.name}`;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -102,63 +153,12 @@ export function EditCategoryDialog({
             </DialogDescription>
           </DialogHeader>
         </div>
-        <form
-          key={`${category.id}-${open}-${category.name}-${category.colorHex}-${category.iconKey}`}
-          action={async (fd) => {
-            const result = await updateCategoryAction(fd);
-            if (!result.ok) {
-              toast.error(result.error);
-              return;
-            }
-            setOpen(false);
-          }}
-          className="grid gap-4 px-5 pb-5 pt-4"
-        >
-          <input type="hidden" name="categoryId" value={category.id} />
-          <input type="hidden" name="iconKey" value={iconKey} />
-          <div className="grid gap-2">
-            <Label htmlFor={`cat-edit-name-${category.id}`} className={labelClass}>
-              Name
-            </Label>
-            <Input
-              id={`cat-edit-name-${category.id}`}
-              name="name"
-              required
-              defaultValue={category.name}
-              placeholder="Category name"
-              className={cn(fieldClass, "cursor-text text-[#333] placeholder:text-[#a3a3a3]")}
-            />
-          </div>
-          <div className="grid gap-2">
-            <span className={labelClass}>Icon</span>
-            <CategoryIconPicker
-              id={`cat-edit-icon-${category.id}`}
-              value={iconKey}
-              onChange={setIconKey}
-              accentColor={colorHex}
-            />
-          </div>
-          <div className="grid gap-2">
-            <span className={labelClass}>Color</span>
-            {legacyColor && (
-              <p className="text-xs leading-snug text-amber-800">
-                This category&apos;s saved color isn&apos;t in the current palette. Choose one of the colors below.
-              </p>
-            )}
-            <CategoryColorPicker
-              name="colorHex"
-              value={colorHex}
-              onChange={setColorHex}
-              takenByOtherCategories={takenByOthers}
-            />
-          </div>
-          <Button
-            type="submit"
-            className="mt-1 h-10 w-full border-0 bg-[#ff6b1e] text-sm font-semibold text-white shadow-none hover:bg-[#ea580c] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"
-          >
-            Save changes
-          </Button>
-        </form>
+        <EditCategoryForm
+          key={formKey}
+          category={category}
+          takenByOthers={takenByOthers}
+          onSaved={() => setOpen(false)}
+        />
       </DialogContent>
     </Dialog>
   );

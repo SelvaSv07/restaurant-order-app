@@ -56,28 +56,21 @@ function paymentLabel(method: "cash" | "card" | "upi" | "other" | null | undefin
 
 type DetailResult = Awaited<ReturnType<typeof getBillDetailAction>>;
 
-export function BillDetailDialog({
+function BillDetailBody({
   billId,
-  open,
   onOpenChange,
 }: {
-  billId: number | null;
-  open: boolean;
+  billId: number;
   onOpenChange: (open: boolean) => void;
 }) {
   const [state, setState] = useState<{
     loading: boolean;
     data: Extract<DetailResult, { ok: true }> | null;
     failed: boolean;
-  }>({ loading: false, data: null, failed: false });
+  }>({ loading: true, data: null, failed: false });
 
   useEffect(() => {
-    if (!open || billId == null) {
-      setState((s) => ({ ...s, loading: false }));
-      return;
-    }
     let cancelled = false;
-    setState({ loading: true, data: null, failed: false });
     getBillDetailAction(billId).then((result) => {
       if (cancelled) return;
       if (result.ok) {
@@ -89,7 +82,7 @@ export function BillDetailDialog({
     return () => {
       cancelled = true;
     };
-  }, [open, billId]);
+  }, [billId]);
 
   const bill = state.data?.bill;
   const lines = state.data?.lines ?? [];
@@ -97,28 +90,26 @@ export function BillDetailDialog({
   const showReprint = bill && bill.status !== "draft" && bill.status !== "voided";
 
   const runReprint = () => {
-    if (billId == null) return;
     void printReceiptToConfiguredDevice(billId);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton={false} className="max-h-[min(90vh,720px)] gap-0 overflow-hidden p-0 sm:max-w-lg">
-        <div className="max-h-[min(90vh,720px)] overflow-y-auto p-6">
-          <DialogHeader className="text-left">
-            <DialogTitle className="text-lg">
-              {bill ? `ORD-${bill.billNumber}` : "Bill details"}
-            </DialogTitle>
-            <DialogDescription className="sr-only">
-              Order line items and totals for this bill.
-            </DialogDescription>
-          </DialogHeader>
+    <>
+      <div className="max-h-[min(90vh,720px)] overflow-y-auto p-6">
+        <DialogHeader className="text-left">
+          <DialogTitle className="text-lg">
+            {bill ? `ORD-${bill.billNumber}` : "Bill details"}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Order line items and totals for this bill.
+          </DialogDescription>
+        </DialogHeader>
 
-          {state.loading ? (
-            <p className="py-8 text-sm text-[#858585]">Loading…</p>
-          ) : state.failed || !bill ? (
-            <p className="py-8 text-sm text-[#858585]">Could not load this bill.</p>
-          ) : (
+        {state.loading ? (
+          <p className="py-8 text-sm text-[#858585]">Loading…</p>
+        ) : state.failed || !bill ? (
+          <p className="py-8 text-sm text-[#858585]">Could not load this bill.</p>
+        ) : (
             <div className="mt-4 space-y-4">
               <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                 <dt className="text-[#858585]">Date</dt>
@@ -200,22 +191,41 @@ export function BillDetailDialog({
               </dl>
             </div>
           )}
-        </div>
+      </div>
 
-        <div className="flex flex-col-reverse gap-2 border-t border-[#ebebeb] bg-[#fafafa] p-4 sm:flex-row sm:justify-end">
-          {showReprint ? (
-            <Button
-              type="button"
-              className="rounded-lg border-0 bg-[#ff6b1e] text-white hover:bg-[#ea580c]"
-              onClick={runReprint}
-            >
-              Reprint
-            </Button>
-          ) : null}
-          <Button type="button" variant="outline" className="rounded-lg" onClick={() => onOpenChange(false)}>
-            Close
+      <div className="flex flex-col-reverse gap-2 border-t border-[#ebebeb] bg-[#fafafa] p-4 sm:flex-row sm:justify-end">
+        {showReprint ? (
+          <Button
+            type="button"
+            className="rounded-lg border-0 bg-[#ff6b1e] text-white hover:bg-[#ea580c]"
+            onClick={runReprint}
+          >
+            Reprint
           </Button>
-        </div>
+        ) : null}
+        <Button type="button" variant="outline" className="rounded-lg" onClick={() => onOpenChange(false)}>
+          Close
+        </Button>
+      </div>
+    </>
+  );
+}
+
+export function BillDetailDialog({
+  billId,
+  open,
+  onOpenChange,
+}: {
+  billId: number | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent showCloseButton={false} className="max-h-[min(90vh,720px)] gap-0 overflow-hidden p-0 sm:max-w-lg">
+        {open && billId != null ? (
+          <BillDetailBody key={billId} billId={billId} onOpenChange={onOpenChange} />
+        ) : null}
       </DialogContent>
     </Dialog>
   );

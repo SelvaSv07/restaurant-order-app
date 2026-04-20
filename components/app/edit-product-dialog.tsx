@@ -1,7 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { updateProductAction } from "@/app/(app)/settings/actions";
 import { Button } from "@/components/ui/button";
@@ -51,16 +51,15 @@ export function EditProductDialog({
     setPhotoOk(ok);
   }, []);
 
-  useEffect(() => {
-    setCategoryId(String(product.categoryId));
-  }, [product.id, product.categoryId]);
-
   return (
     <Dialog
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
-        if (next) setPhotoOk(true);
+        if (next) {
+          setPhotoOk(true);
+          setCategoryId(String(product.categoryId));
+        }
       }}
     >
       <DialogTrigger
@@ -71,6 +70,7 @@ export function EditProductDialog({
         Edit
       </DialogTrigger>
       <DialogContent
+        key={product.id}
         className="max-w-[calc(100%-2rem)] gap-0 overflow-hidden rounded-2xl border-0 bg-white p-0 shadow-[0_4px_24px_rgba(51,51,51,0.08)] ring-1 ring-[#ebebeb] sm:max-w-[440px]"
         showCloseButton
       >
@@ -154,11 +154,11 @@ export function EditProductDialog({
             Active (shown on menu / billing)
           </label>
           <ProductPhotoFileField
+            key={String(open)}
             id={`edit-image-${product.id}`}
             label="Photo — optional, leave empty to keep current"
             labelClassName={labelClass}
             existingImageSrc={product.imageLocalPath}
-            open={open}
             onValidationChange={onPhotoValidation}
           />
           <Button

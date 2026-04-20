@@ -2,14 +2,14 @@
 
 import { Minus, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { setInventoryQuantity } from "@/app/(app)/inventory/actions";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-export function InventoryUpdateStockDialog({
+function InventoryUpdateStockDialogInner({
   id,
   name,
   unit,
@@ -25,10 +25,6 @@ export function InventoryUpdateStockDialog({
   const [pending, startTransition] = useTransition();
   const [value, setValue] = useState(quantity);
 
-  useEffect(() => {
-    if (open) setValue(quantity);
-  }, [open, quantity, id]);
-
   function save() {
     const q = Math.max(0, value);
     startTransition(async () => {
@@ -43,7 +39,13 @@ export function InventoryUpdateStockDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (next) setValue(quantity);
+      }}
+    >
       <DialogTrigger
         type="button"
         className="inline-flex h-8 cursor-pointer items-center justify-center rounded-lg border border-[#ff6b1e]/30 bg-[#fff7ed] px-3 text-xs font-semibold text-[#c2410c] shadow-none outline-none transition hover:bg-[#ffedd5] focus-visible:ring-2 focus-visible:ring-[#ff6b1e]/35"
@@ -97,4 +99,13 @@ export function InventoryUpdateStockDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+export function InventoryUpdateStockDialog(props: {
+  id: number;
+  name: string;
+  unit: string;
+  quantity: number;
+}) {
+  return <InventoryUpdateStockDialogInner key={`${props.id}-${props.quantity}`} {...props} />;
 }

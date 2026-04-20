@@ -1,5 +1,7 @@
 "use client";
 
+import { createElement } from "react";
+
 import { getCategoryIcon } from "@/lib/category-icons";
 
 export function CategoryLucideIcon({
@@ -11,6 +13,9 @@ export function CategoryLucideIcon({
   color: string;
   className?: string;
 }) {
-  const Icon = getCategoryIcon(name);
-  return <Icon className={className} style={{ color }} aria-hidden />;
+  return createElement(getCategoryIcon(name), {
+    className,
+    style: { color },
+    "aria-hidden": true,
+  });
 }

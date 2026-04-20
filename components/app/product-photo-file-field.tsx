@@ -14,7 +14,6 @@ export function ProductPhotoFileField({
   label,
   labelClassName,
   existingImageSrc,
-  open,
   description,
   onValidationChange,
 }: {
@@ -22,7 +21,6 @@ export function ProductPhotoFileField({
   label: string;
   labelClassName: string;
   existingImageSrc?: string | null;
-  open: boolean;
   description?: string;
   /** `false` when file is over the size limit */
   onValidationChange?: (ok: boolean) => void;
@@ -32,19 +30,14 @@ export function ProductPhotoFileField({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!open) {
-      setPreviewUrl((prev) => {
-        if (prev) URL.revokeObjectURL(prev);
-        return null;
-      });
-      setError(null);
-      if (inputRef.current) inputRef.current.value = "";
-    }
-  }, [open]);
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   useEffect(() => {
     onValidationChange?.(error === null);
-  }, [error]);
+  }, [error, onValidationChange]);
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];

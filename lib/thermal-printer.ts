@@ -164,7 +164,6 @@ export interface KotData {
 
 export function generateKotBytes(data: KotData): Buffer {
   const is58 = data.paperWidth === "58mm";
-  const LW = is58 ? LINE_58 : LINE_80;
   const SEP = is58 ? SEP_58 : SEP_80;
   const CI = is58 ? COL_ITEM_58 : COL_ITEM_80;
   const CQ = is58 ? COL_QTY_58 : COL_QTY_80;

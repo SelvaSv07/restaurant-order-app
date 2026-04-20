@@ -35,7 +35,14 @@ function parseLastSyncAt(value: Date | string | null | undefined): Date | null {
 
 function formatLastSyncAt(value: Date | null): string {
   if (!value) return "Never";
-  return value.toLocaleString("en-IN");
+  return value.toLocaleString("en-IN", {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
 }
 
 export function CloudSyncSettingsForm({
@@ -48,7 +55,6 @@ export function CloudSyncSettingsForm({
   const router = useRouter();
   const [syncing, setSyncing] = useState(false);
   const [lastSyncAt, setLastSyncAt] = useState<Date | null>(() => parseLastSyncAt(defaults.lastSyncAt));
-  const [lastError, setLastError] = useState(defaults.lastError);
 
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -62,8 +68,7 @@ export function CloudSyncSettingsForm({
 
   useEffect(() => {
     setLastSyncAt(parseLastSyncAt(defaults.lastSyncAt));
-    setLastError(defaults.lastError);
-  }, [defaults.lastSyncAt, defaults.lastError]);
+  }, [defaults.lastSyncAt]);
 
   function openEditDialog() {
     setEditEnabled(defaults.enabled);
@@ -110,7 +115,6 @@ export function CloudSyncSettingsForm({
       const body = await runCloudSyncNow();
       if (!body.ok) {
         toast.error(body.error);
-        setLastError(body.error);
         return;
       }
       if (body.skipped) {
@@ -127,7 +131,6 @@ export function CloudSyncSettingsForm({
       }
       toast.success("Synced to cloud");
       setLastSyncAt(new Date());
-      setLastError("");
     } catch {
       toast.error("Sync failed");
     } finally {
@@ -323,15 +326,6 @@ export function CloudSyncSettingsForm({
           )}
         </DialogContent>
       </Dialog>
-
-      <div className="rounded-xl border border-[#ebebeb] bg-[#fafafa] px-4 py-3 text-sm">
-        <p className="font-medium text-[#333]">Sync status</p>
-        {lastError?.trim() ? (
-          <p className="mt-2 text-destructive">{lastError}</p>
-        ) : (
-          <p className="mt-2 text-xs text-[#858585]">No errors recorded.</p>
-        )}
-      </div>
     </div>
   );
 }
