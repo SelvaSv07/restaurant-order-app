@@ -26,6 +26,22 @@ function getAppRoot() {
   return path.join(__dirname, "..");
 }
 
+/** Same asset as Next `/favicon.ico` — window / taskbar icon (Windows: .ico). */
+function resolveAppIconPath() {
+  const candidates = [
+    path.join(__dirname, "..", "public", "favicon.ico"),
+    path.join(__dirname, "favicon.ico"),
+  ];
+  for (const p of candidates) {
+    try {
+      if (fs.existsSync(p)) return p;
+    } catch {
+      // ignore
+    }
+  }
+  return undefined;
+}
+
 /** Pick a port that is free on 127.0.0.1 (OS assigns when 0). */
 function getFreePort() {
   return new Promise((resolve, reject) => {
@@ -329,11 +345,13 @@ function registerPrintIpc() {
     const deviceName = await resolveDeviceName(options?.deviceName);
 
     const session = mainWindow?.webContents.session;
+    const iconPath = resolveAppIconPath();
     const win = new BrowserWindow({
       show: false,
       width: 900,
       height: 2000,
       backgroundColor: "#ffffff",
+      ...(iconPath ? { icon: iconPath } : {}),
       webPreferences: {
         contextIsolation: true,
         nodeIntegration: false,
@@ -452,9 +470,11 @@ function registerPrintIpc() {
 
 function createWindow(url) {
   const preloadPath = path.join(__dirname, "preload.cjs");
+  const iconPath = resolveAppIconPath();
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
+    ...(iconPath ? { icon: iconPath } : {}),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -474,6 +494,7 @@ function createWindow(url) {
         return { action: "deny" };
       }
       const session = mainWindow?.webContents.session;
+      const printIcon = resolveAppIconPath();
       return {
         action: "allow",
         overrideBrowserWindowOptions: {
@@ -481,6 +502,7 @@ function createWindow(url) {
           height: 760,
           autoHideMenuBar: true,
           backgroundColor: "#ffffff",
+          ...(printIcon ? { icon: printIcon } : {}),
           webPreferences: {
             contextIsolation: true,
             nodeIntegration: false,

@@ -26,8 +26,8 @@ const COL_QTY_80 = 8;
 const COL_PRICE_80 = 16;
 
 // ── 58mm paper ─────────────────────────────────────────────────────────────────
-// Many 58mm ESC/POS units wrap before 32 chars; 28 fits one line reliably (rule + item grid).
-const LINE_58 = 28;
+// Many 58mm ESC/POS units wrap before 28 chars; 20 fits one line reliably (rule + item grid).
+const LINE_58 = 20;
 const SEP_58 = "-".repeat(LINE_58);
 const COL_ITEM_58 = 14;
 const COL_QTY_58 = 7;

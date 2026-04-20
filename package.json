@@ -72,7 +72,8 @@
     },
     "files": [
       "electron/**/*",
-      "package.json"
+      "package.json",
+      "public/favicon.ico"
     ],
     "extraResources": [
       {
@@ -85,6 +86,7 @@
       }
     ],
     "win": {
+      "icon": "public/favicon.ico",
       "signAndEditExecutable": false,
       "signDlls": false,
       "target": [
